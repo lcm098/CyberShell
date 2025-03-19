@@ -86,7 +86,7 @@ class Interpreter(ExprVisitor):
     
     def visit_mov_instruction(self, inst):
         stander_variable = inst.stander_var.lexeme
-        value = self.evaluate(inst.value)[0]
+        value = self.evaluate(inst.value)
         
         stdvar = StanderVariable()
         
@@ -105,8 +105,11 @@ class Interpreter(ExprVisitor):
     
     def visit_identifier(self, inst):
         identifier = inst.identifier.lexeme
-        value = self.evaluate(identifier)
-        return value
+        if self.environment.is_defined(identifier):
+            value = self.environment.get(identifier)
+            return value
+        else:
+            raise InstructionError(f"identifier {identifier} is not defined, while using")
     
     def visit_unknown_block(self, expr):
         self.execute_block(expr.block, Environment(self.environment))
@@ -145,31 +148,31 @@ class Interpreter(ExprVisitor):
 
         if expr.operator.lexeme == '+':
             _eval_ = left + right
-            return (float(_eval_), "FLOAT", id(_eval_))
+            return (float(_eval_), "float", id(_eval_))
         elif expr.operator.lexeme == '-':
             _eval_ = left - right
-            return (float(_eval_), "FLOAT", id(_eval_))
+            return (float(_eval_), "float", id(_eval_))
         elif expr.operator.lexeme == '*':
             _eval_ = left * right
-            return (float(_eval_), "FLOAT", id(_eval_))
+            return (float(_eval_), "float", id(_eval_))
         elif expr.operator.lexeme == '/':
             _eval_ = left / right
-            return (float(_eval_), "FLOAT", id(_eval_))
+            return (float(_eval_), "float", id(_eval_))
         elif expr.operator.lexeme == '>':
             _eval_ = left > right
-            return (bool(_eval_), "BOOL", id(_eval_))
+            return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '>=':
             _eval_ = left >= right
-            return (bool(_eval_), "BOOL", id(_eval_))
+            return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '<':
             _eval_ = left < right
-            return (bool(_eval_), "BOOL", id(_eval_))
+            return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '==':
             _eval_ = left == right
-            return (bool(_eval_), "BOOL", id(_eval_))
+            return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '===':
             _eval_ = type(left).__name__ == type(right).__name__
-            return (bool(_eval_), "BOOL", id(_eval_))
+            return (bool(_eval_), "bool", id(_eval_))
         else:
             raise ValueError(f"Unsupported binary operator: {expr.operator}")
 

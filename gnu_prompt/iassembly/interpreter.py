@@ -36,10 +36,6 @@ class ExprVisitor:
     def visit_grouping_expr(self, expr):
         raise NotImplementedError("visit_grouping_expr must be implemented by a subclass.")
 
-    def visit_cmd_activation_expr(self, expr):
-        raise NotImplementedError("visit_cmd_activation_expr must be implemented by a subclass.")
-
-
     def visit_using_type_expr(self, expr):
         raise NotImplementedError("visit_using_type_expr must be implemented by a subclass")
 
@@ -87,7 +83,7 @@ class Interpreter(ExprVisitor):
     def visit_mov_instruction(self, inst):
         stander_variable = inst.stander_var.lexeme
         value = self.evaluate(inst.value)
-        
+        line = inst.line
         stdvar = StanderVariable()
         
         if (stander_variable == stdvar.ras) or (stander_variable == stdvar.rbs) or (stander_variable == stdvar.rcs) or (stander_variable == stdvar.rds) or (stander_variable == stdvar.rex):
@@ -100,16 +96,20 @@ class Interpreter(ExprVisitor):
                 self.environment.assign(stdvar.rdo_var, value)
             else:
                 self.environment.define(stdvar.rdo_var, value, False)
+        
+        else:
+            raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
         return (stander_variable, value) # have to remove this line
         
     
     def visit_identifier(self, inst):
         identifier = inst.identifier.lexeme
+        line = inst.line
         if self.environment.is_defined(identifier):
             value = self.environment.get(identifier)
             return value
         else:
-            raise InstructionError(f"identifier {identifier} is not defined, while using")
+            raise InstructionError(f"identifier {identifier} is not defined, while using it. \t\tOn Line =[{line}]")
     
     def visit_unknown_block(self, expr):
         self.execute_block(expr.block, Environment(self.environment))

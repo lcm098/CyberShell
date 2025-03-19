@@ -100,6 +100,7 @@ def process_command(buffer):
             print(f"instruction error : [{err}]")
         except ValueError as err:
             print(f"value error : [{err}]")
+        
     else:
         print(f"Command not recognized: {command}")
         main_prompt()
@@ -112,6 +113,8 @@ def main_prompt():
         command = input(prompt)
         buffer = shellx(command)
         process_command(buffer)
+        main_prompt()
+        
     except EOFError:
         print("\nExiting shell...")
         sys.exit(0)

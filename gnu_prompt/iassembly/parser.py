@@ -107,23 +107,14 @@ class Expr:
         
         def accept(self, visitor):
             return visitor.visit_grouping_expr(self)
-
-    class CmdActivation:
-        def __init__(self, value):
-            self.value = value
-        
-        def __repr__(self):
-            return f"Command(value={self.value})"
-        
-        def accept(self, visitor):
-            return visitor.visit_cmd_activation_expr(self)
         
     class UsingType:
-        def __init__(self, value):
+        def __init__(self, value, line):
             self.value = value
+            self.line = line
             
         def __repr__(self):
-            return f"Using(value={self.value})"
+            return f"Using(value={self.value}, line={self.line})"
         
         def accept(self, visitor):
             return visitor.visit_using_type_expr(self)
@@ -139,22 +130,24 @@ class Expr:
             return visitor.visit_unknown_block(self)
         
     class Identifier:
-        def __init__(self, identifier):
+        def __init__(self, identifier, line):
             self.identifier = identifier
+            self.line = line
             
         def __repr__(self):
-            return f"IDENTIFIER = ({self.identifier})"
+            return f"IDENTIFIER = ({self.identifier}, line={self.line})"
         
         def accept(self, visitor):
             return visitor.visit_identifier(self)
         
     class MovInstruction:
-        def __init__(self, stander_var, value):
+        def __init__(self, stander_var, value, line):
             self.stander_var = stander_var
             self.value = value
+            self.line = line
             
         def __repr__(self):
-            return f"Mov Instruction = ({self.stander_var}, {self.value})"
+            return f"Mov Instruction = ({self.stander_var}, {self.value}, line={self.line})"
         
         def accept(self, visitor):
             return visitor.visit_mov_instruction(self)
@@ -199,11 +192,11 @@ class Parser:
         return self.expression()
 
     def handle_mov_instruction(self):
-        
+        line = self.peek().line
         stander_var = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer")
         self.consume(TokenType.COMMA, "Expected ',' after identifier")
         value = self.expression()
-        return Expr.MovInstruction(stander_var, value)
+        return Expr.MovInstruction(stander_var, value, line)
     
     def expression(self):
         return self.or_expr()
@@ -270,8 +263,9 @@ class Parser:
             return Expr.Grouping(expr)
         
         if self.match(TokenType.HANT_OPERATOR):
+            line = self.peek().line
             expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
-            return Expr.Identifier(expr)
+            return Expr.Identifier(expr, line)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

@@ -100,7 +100,7 @@ class Interpreter(ExprVisitor):
                 self.environment.assign(stdvar.rdo_var, value)
             else:
                 self.environment.define(stdvar.rdo_var, value, False)
-        return (stander_variable, value)
+        return (stander_variable, value) # have to remove this line
         
     
     def visit_identifier(self, inst):

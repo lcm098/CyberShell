@@ -1,5 +1,6 @@
 from iassembly.lexer import *
 from iassembly.interpreter import *
+from iassembly.stdvar import *
 
 class Expr:
         
@@ -137,48 +138,26 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_unknown_block(self)
         
-    class BITWISE_AND:
-        def __init__(self, va1, va2):
-            self.va1 = va1
-            self.va2 = va2
-        
+    class Identifier:
+        def __init__(self, identifier):
+            self.identifier = identifier
+            
         def __repr__(self):
-            return f"BITWISE_AND(va1={self.va1, self.va2})"
+            return f"IDENTIFIER = ({self.identifier})"
         
         def accept(self, visitor):
-            return visitor.visit_bitwise_and(self)
+            return visitor.visit_identifier(self)
         
-    class BITWISE_OR:
-        def __init__(self, va1, va2):
-            self.va1 = va1
-            self.va2 = va2
-        
+    class MovInstruction:
+        def __init__(self, stander_var, value):
+            self.stander_var = stander_var
+            self.value = value
+            
         def __repr__(self):
-            return f"BITWISE_OR(block={self.va1, self.va2})"
+            return f"Mov Instruction = ({self.stander_var}, {self.value})"
         
         def accept(self, visitor):
-            return visitor.visit_bitwise_or(self)
-        
-    class BITWISE_NOT:
-        def __init__(self, va1):
-            self.va1 = va1
-        
-        def __repr__(self):
-            return f"BITWISE_NOT(block={self.va1})"
-        
-        def accept(self, visitor):
-            return visitor.visit_bitwise_not(self)
-        
-    class BITWISE_XOR:
-        def __init__(self, va1, va2):
-            self.va1 = va1
-            self.va2 = va2
-        
-        def __repr__(self):
-            return f"BITWISE_XOR(block={self.va1, self.va2})"
-        
-        def accept(self, visitor):
-            return visitor.visit_bitwise_xor(self)
+            return visitor.visit_mov_instruction(self)
     
     
 class ParseError(Exception):
@@ -195,17 +174,37 @@ class Parser:
         self.current = 0
 
     def parse(self):
-        statements = []
-        while not self.is_at_end():
-            statements.append(self.declaration())
-        return statements
+        
+        if self.match(TokenType.SECTION):
+            self.consume(TokenType.DOT, "Expected '.' in the entry-point of text-code")
+            self.consume(TokenType.TEXT, "Expected 'text' as the entry-point of code")
+            self.consume(TokenType.DOUBLE_OR, "Expected '||' environment-encloser of main-text code")
+            statements = []
+                
+            # Use peek instead of match to avoid consuming the end token prematurely
+            while not self.match(TokenType.DOUBLE_OR):
+                statements.append(self.declaration())
+
+            return statements
+        return []  # Return empty if no valid block is found
+        
  
     def declaration(self):
-        if self.match(TokenType.LEFT_BRACE):
+        if self.match(TokenType.DOUBLE_OR):
             return self.handle_unknown_block_statement()
+        
+        elif self.match(TokenType.MOV):
+            return self.handle_mov_instruction()
         
         return self.expression()
 
+    def handle_mov_instruction(self):
+        
+        stander_var = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer")
+        self.consume(TokenType.COMMA, "Expected ',' after identifier")
+        value = self.expression()
+        return Expr.MovInstruction(stander_var, value)
+    
     def expression(self):
         return self.or_expr()
     
@@ -269,13 +268,17 @@ class Parser:
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
+        
+        if self.match(TokenType.HANT_OPERATOR):
+            expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
+            return Expr.Identifier(expr)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)
 
     def handle_unknown_block_statement(self):
         unknown_block = self.block()
-        self.consume(TokenType.RIGHT_BRACE, "Expecting '}' after '{' (a unknown block statement)")
+        self.consume(TokenType.DOUBLE_OR, "Expecting '||' after '||' (a unknown block statement)")
         return Expr.EmptyBlock(unknown_block)
     
     def block(self):

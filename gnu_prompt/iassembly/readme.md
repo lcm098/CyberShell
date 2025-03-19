@@ -8,6 +8,9 @@ section .text ||
     call write, rdo_var        // call write function to print it
     unload fptr       // nice way to unload fptr, every time after load
 
+
+    
+
     link arr, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     load fptr, @[arr]
     call write, rdo_var

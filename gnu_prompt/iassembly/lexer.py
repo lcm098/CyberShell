@@ -74,6 +74,7 @@ INVOKE =  "INVOKE"
 EOF = "EOF"  # Added missing EOF token type
 SET = "SET"
 INJECT = "INJECT"
+HANT_OPERATOR = "HANT_OPERATOR"
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -83,7 +84,7 @@ TOKEN_TYPES = [
     TEXT, DATA, BSS, DOUBLE_OR, READ, WRITE, RETURN, EXEC, FIPTR, INC, DEC, LOOP,
     ADDRESS_OF_OPERATOR, CONDITIONAL_AND, BANG, CONDITIONAL_OR, BANG_EQUAL, EQUAL_EQUAL,
     DATA_EQUAL, TRUE, FALSE, NIL, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
-    INVOKE, SET, GET, INJECT
+    INVOKE, SET, GET, INJECT, HANT_OPERATOR
 ]
 
 keywords = {
@@ -268,12 +269,17 @@ class Lexer:
         
         if c == "|":
             if  self.match("|"):
-                self.add_token(CONDITIONAL_OR)
-        elif c == "&":
-            if self.match("&"):
-                self.add_token(CONDITIONAL_AND)
+                self.add_token(DOUBLE_OR)
             else:
-                self.add_token(ADDRESS_OF_OPERATOR)
+                self.add_token(CONDITIONAL_OR)
+        elif c == '@':
+            self.add_token(ADDRESS_OF_OPERATOR)
+        
+        elif c == '#':
+            self.add_token(HANT_OPERATOR)    
+        
+        elif c == "&":
+            self.add_token(CONDITIONAL_AND)
         elif c == '(':
             self.add_token(LEFT_PAREN)
         elif c == ')':
@@ -429,3 +435,4 @@ class TokenType:
     EOF = "EOF"  # Added missing EOF token type
     SET = "SET"
     INJECT = "INJECT"
+    HANT_OPERATOR = "HANT_OPERATOR"

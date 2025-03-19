@@ -5,6 +5,9 @@ import pty
 from iassembly.interpreter import Interpreter
 from iassembly.parser import Parser
 from iassembly.lexer import Lexer
+from iassembly.parser import ParseError
+from iassembly.lexer import LexerError
+from iassembly.interpreter import ValueError, InstructionError
 
 # new instance of interpreter
 interpreter = Interpreter()
@@ -78,7 +81,7 @@ def process_command(buffer):
                     
                 lexer = Lexer(code)
                 token = lexer.scan_tokens()
-            
+                
                 parser = Parser(token)
                 ast = parser.parse()
             
@@ -89,8 +92,14 @@ def process_command(buffer):
             else:
                 print("too many arguments while executing international-assembly")
         
-        except Exception as Err:
-            print(Err)
+        except ParseError as err:
+            print(f"rules error : [{err}]")
+        except LexerError as err:
+            print(f"syntax error : [{err}]")
+        except InstructionError as err:
+            print(f"instruction error : [{err}]")
+        except ValueError as err:
+            print(f"value error : [{err}]")
     else:
         print(f"Command not recognized: {command}")
         main_prompt()

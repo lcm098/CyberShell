@@ -1,5 +1,6 @@
 from iassembly.parser import *
 from iassembly.buffer import *
+from iassembly.stdvar import StanderVariable
 
 class ExprVisitor:
         
@@ -8,17 +9,104 @@ class ExprVisitor:
     Each visit method corresponds to a specific type of expression.
     """
 
+    def visit_number_expr(self, expr):
+        raise NotImplementedError("visit_number_expr must be implemented by a subclass.")
+    
+    def visit_bool_expr(self, expr):
+        raise NotImplementedError("visit_bool_expr must be implemented by a subclass.")
+    
+    def visit_nil_expr(self, expr):
+        raise NotImplementedError("visit_nil_expr must be implemented by a subclass.")
+    
+    def visit_char_expr(self, expr):
+        raise NotImplementedError("visit_char_expr must be implemented by a subclass.")
+    
+    def visit_binary_expr(self, expr):
+        raise NotImplementedError("visit_binary_expr must be implemented by a subclass.")
+
+    def visit_logical_expr(self, expr):
+        raise NotImplementedError("visit_logical_expr must be implemented by a subclass.")
+
+    def visit_unary_expr(self, expr):
+        raise NotImplementedError("visit_unary_expr must be implemented by a subclass.")
+
+    def visit_literal_expr(self, expr):
+        raise NotImplementedError("visit_literal_expr must be implemented by a subclass.")
+
+    def visit_grouping_expr(self, expr):
+        raise NotImplementedError("visit_grouping_expr must be implemented by a subclass.")
+
+    def visit_cmd_activation_expr(self, expr):
+        raise NotImplementedError("visit_cmd_activation_expr must be implemented by a subclass.")
+
+
+    def visit_using_type_expr(self, expr):
+        raise NotImplementedError("visit_using_type_expr must be implemented by a subclass")
+
     def accept(self, visitor):
         raise NotImplementedError("Subclasses must implement accept method")
 
+    def visit_unknown_block(self, stmt):
+        raise NotImplementedError("visit_unknown_block must be implemented by a subclass")
+
+    def visit_float_expr(self, expr):
+        raise NotImplementedError("visit_float_expr must be implemented by a subclass")
+    
+    def visit_identifier(self, inst):
+        raise NotImplementedError("visit_identifier must be implemented by a subclass")
+        
+    
+    def visit_mov_instruction(self, inst):
+        raise NotImplementedError("visit_mov_instruction must be implemented by a subclass")
+    
+    def accept(self, visitor):
+        raise NotImplementedError("Subclasses must implement accept method")
+
+class ValueError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+        
+    def __repr__(self):
+        return self.message
+    
+class InstructionError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+        
+    def __repr__(self):
+        return self.message
     
 class Interpreter(ExprVisitor):
     def __init__(self):
         self.environment = Environment()
+        self.pointer_environment = PointerStructure()
+    
+    
+    def visit_mov_instruction(self, inst):
+        stander_variable = inst.stander_var.lexeme
+        value = self.evaluate(inst.value)[0]
         
-    """
-    Interpreter for evaluating expressions. Implements the visitor methods.
-    """
+        stdvar = StanderVariable()
+        
+        if (stander_variable == stdvar.ras) or (stander_variable == stdvar.rbs) or (stander_variable == stdvar.rcs) or (stander_variable == stdvar.rds) or (stander_variable == stdvar.rex):
+            if self.environment.is_defined(stander_variable):
+                self.environment.assign(stander_variable, value)
+            else:
+                self.environment.define(stander_variable, value, False)
+            
+            if self.environment.is_defined(stdvar.rdo_var):
+                self.environment.assign(stdvar.rdo_var, value)
+            else:
+                self.environment.define(stdvar.rdo_var, value, False)
+        return (stander_variable, value)
+        
+    
+    def visit_identifier(self, inst):
+        identifier = inst.identifier.lexeme
+        value = self.evaluate(identifier)
+        return value
     
     def visit_unknown_block(self, expr):
         self.execute_block(expr.block, Environment(self.environment))

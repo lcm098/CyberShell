@@ -125,7 +125,7 @@ class Interpreter(ExprVisitor):
         try:
             elements = []
             for item in range(buffer):
-                elements.append(self.evaluate(item))
+                print(item)
             
             if self.environment.is_defined(self.stdvar.rdo_var):
                 self.environment.assign(self.stdvar.rdo_var, (elements, "array", id(elements)))

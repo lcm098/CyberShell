@@ -258,8 +258,24 @@ class Parser:
         return expr
 
     def comparison(self):
-        expr = self.unary()
+        expr = self.term()
         while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
+            operator = self.previous()
+            right = self.term()
+            expr = Expr.Binary(expr, operator, right)
+        return expr
+
+    def term(self):
+        expr = self.factor()
+        while self.match(TokenType.MINUS, TokenType.PLUS):
+            operator = self.previous()
+            right = self.factor()
+            expr = Expr.Binary(expr, operator, right)
+        return expr
+
+    def factor(self):
+        expr = self.unary()
+        while self.match(TokenType.SLASH, TokenType.STAR, TokenType.MODULUS):
             operator = self.previous()
             right = self.unary()
             expr = Expr.Binary(expr, operator, right)
@@ -299,7 +315,7 @@ class Parser:
             expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
             return Expr.Identifier(expr, line)
         
-        if self.match(TokenType.PERCENTAGE):
+        if self.match(TokenType.AT_THE_RATE):
             line = self.peek().line
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden list subset")
             elements_buff = []

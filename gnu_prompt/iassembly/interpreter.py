@@ -117,7 +117,7 @@ class Interpreter(ExprVisitor):
                 for item in temp:
                     elements.append(item[0])
                 self.define_in_pointer_environment(stander_pointer, elements)
-                return (stander_pointer, elements)
+                
             else:
                 raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")        
     
@@ -276,6 +276,9 @@ class Interpreter(ExprVisitor):
         elif expr.operator.lexeme == '/':
             _eval_ = left / right
             return (float(_eval_), "float", id(_eval_))
+        elif expr.operator.lexeme == '%':
+            _eval_ = left % right
+            return (float(_eval_), "float", id(_eval_))
         elif expr.operator.lexeme == '>':
             _eval_ = left > right
             return (bool(_eval_), "bool", id(_eval_))
@@ -284,6 +287,9 @@ class Interpreter(ExprVisitor):
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '<':
             _eval_ = left < right
+            return (bool(_eval_), "bool", id(_eval_))
+        elif expr.operator.lexeme == "!=":
+            _eval_ = left != right
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '==':
             _eval_ = left == right

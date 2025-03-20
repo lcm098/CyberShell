@@ -75,7 +75,17 @@ EOF = "EOF"  # Added missing EOF token type
 SET = "SET"
 INJECT = "INJECT"
 HANT_OPERATOR = "HANT_OPERATOR"
-PERCENTAGE = "PERCENTAGE"
+POW = "POW"
+SQRT = "SQRT"
+CEIL = "CEIL"
+FLOOR = "FLOOR"
+PLUS = "PLUS"
+MINUS = "MINUS"
+SLASH = "SLASH"
+STAR = "START"
+MODULUS = "MODULUS"
+AT_THE_RATE = "AT_THE_RATE"
+COMPUTE = "COMPUTE"
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -85,7 +95,8 @@ TOKEN_TYPES = [
     TEXT, DATA, BSS, DOUBLE_OR, READ, WRITE, RETURN, EXEC, FIPTR, INC, DEC, LOOP,
     ADDRESS_OF_OPERATOR, CONDITIONAL_AND, BANG, CONDITIONAL_OR, BANG_EQUAL, EQUAL_EQUAL,
     DATA_EQUAL, TRUE, FALSE, NIL, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
-    INVOKE, SET, GET, INJECT, HANT_OPERATOR, PERCENTAGE
+    INVOKE, SET, GET, INJECT, HANT_OPERATOR, POW, SQRT, CEIL, FLOOR,
+    PLUS, MINUS, SLASH, STAR, MODULUS, AT_THE_RATE, COMPUTE
 ]
 
 keywords = {
@@ -99,8 +110,13 @@ keywords = {
     "clsv" : CLSV,
     "dec" : DEC,
     "get" : GET,
+    "compute" : COMPUTE,
     "is" : IS,
     "link" : LINK,
+    "pow" : POW,
+    "sqrt" : SQRT,
+    "ceil" : CEIL,
+    "floor" : FLOOR,
     "true" : TRUE,
     "false" : FALSE,
     "nil" : NIL,
@@ -279,9 +295,6 @@ class Lexer:
         elif c == '#':
             self.add_token(HANT_OPERATOR)    
         
-        elif c == '%':
-            self.add_token(PERCENTAGE)
-        
         elif c == "&":
             self.add_token(CONDITIONAL_AND)
         elif c == '(':
@@ -300,7 +313,7 @@ class Lexer:
             self.add_token(COMMA)
         elif c == '.':
             self.add_token(DOT)
-        elif c == "%":
+        elif c == "@":
             self.add_token(MOD)
         elif c == '!':
             self.add_token(BANG_EQUAL if self.match('=') else BANG)
@@ -319,10 +332,20 @@ class Lexer:
             self.add_token(GREATER_EQUAL if self.match('=') else GREATER)
         elif c == ':':
             self.add_token(COLON)
+        elif c == '+':
+            self.add_token(PLUS)
+        elif c == '-':
+            self.add_token(MINUS)
+        elif c == '*':
+            self.add_token(STAR)
+        elif c == '%':
+            self.add_token(MODULUS)
         elif c == '/':
             if self.match('/'):
                 while self.peek() != '\n' and not self.is_at_end():
                     self.advance()
+            else:
+                self.add_token(SLASH)
             
         elif c in {' ', '\r', '\t'}:
             pass  # Ignore whitespace
@@ -411,6 +434,10 @@ class TokenType:
     WRITE = "WRITE"
     RETURN = "RETURN"
     EXEC = "EXEC"
+    POW = "POW"
+    SQRT = "SQRT"
+    CEIL = "CEIL"
+    FLOOR = "FLOOR"
     CALL = "CALL"
     STRING = "STRING"
     FLOAT = "FLOAT"
@@ -428,7 +455,6 @@ class TokenType:
     LESS_EQUAL = "LESS_EQUAL"
     TRUE = "TRUE"
     FALSE = "FALSE"
-    PERCENTAGE = "PERCENTAGE"
     NIL = "NIL"
     PUSHA = "PUSHA"
     POPA = "POPA"
@@ -441,3 +467,10 @@ class TokenType:
     SET = "SET"
     INJECT = "INJECT"
     HANT_OPERATOR = "HANT_OPERATOR"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    SLASH = "SLASH"
+    STAR = "START"
+    MODULUS = "MODULUS"
+    AT_THE_RATE = "AT_THE_RATE"
+    COMPUTE = "COMPUTE"

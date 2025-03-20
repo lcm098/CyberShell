@@ -300,7 +300,7 @@ class Parser:
             return Expr.Identifier(expr, line)
         
         if self.match(TokenType.PERCENTAGE):
-            line = self.peek()
+            line = self.peek().line
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden array subset")
             elements_buff = []
             while True:

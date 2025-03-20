@@ -1,6 +1,6 @@
 
 section .text ||
     mov ras, 55
-    mov rbs, %[#ras]
-    load fptr, rdo_var
+    mov ecx_res, %[#ras]
+    load fptr, ecx_res
 ||

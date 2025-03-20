@@ -6,14 +6,17 @@ class StanderVariable:
     rbs = "rbs"
     rcs = "rcs"
     rds = "rds"
-    rex = "rex"
+    res = "res"
+    rfs = "ref"
+    rgs = "rgs"
 
     ecx_res = "ecx_res" # used to resolve value at address
     edx_res = "edx_rex" # used to resolve value at address
     eex_res = "eex_res" # used to resolve value at address
     efx_res = "efx_res" # used to resolve value at address
-    egx_res = "egx_rex" # used to resolve value at address
-    ehx_res = "ehx_rex" # used to resolve value at address
+    egx_res = "egx_res" # used to resolve value at address
+    ehx_res = "ehx_res" # used to resolve value at address
+    eix_res = "eix_res" # used to resolve value at address
 
     # special pointer for data structure (data_link_pointer)
     dsptr = "dsptr"
@@ -34,3 +37,6 @@ class StanderVariable:
     dd = "dd"
     dl = "dl"
     dr = "dr"
+    
+    
+    

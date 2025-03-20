@@ -92,31 +92,36 @@ class Interpreter(ExprVisitor):
         self.environment = Environment()
         self.pointer_environment = PointerStructure()
         self.stdvar = StanderVariable()
+        self.addr_environment = AddressResolverStructure()
     
     
     def visit_Load_instruction(self, inst):
         line = inst.line
         stander_pointer = inst.stander_pointer.lexeme
-        stander_var = inst.stander_var.lexeme
+        stander_variable = inst.stander_var.lexeme
         
         elements = []
         temp = []
         if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr):
-            if stander_var == self.stdvar.rdo_var:
-                temp = self.environment.get(stander_var)
                 
-                if isinstance(temp, list):
-                    for item in temp:
-                        elements.append(item[0])
-                    if self.pointer_environment.is_defined(stander_pointer):
-                        self.pointer_environment.assign(stander_pointer, elements)
-                    else:
-                        self.pointer_environment.define(stander_pointer, elements, False)
-                else:
-                    raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")
+            if (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res):
+                temp = self.addr_environment.get(stander_variable)
+            elif (stander_variable == self.stdvar.rdo_var):
+                temp = self.environment.get(stander_variable)
+                
             else:
-                raise InstructionError(f"Use Runtime-Read-Only Variable (rdo_var) at the place of '{stander_var}'. \t\tOn Line=[{line}]")
-        
+                raise InstructionError(f"Use Runtime-Read-Only Variable (rdo_var) or (Pointer-Resolver-Variable) at the place of '{stander_variable}'. \t\tOn Line=[{line}]")
+                    
+            if isinstance(temp, list):
+                for item in temp:
+                    elements.append(item[0])
+                if self.pointer_environment.is_defined(stander_pointer):
+                    self.pointer_environment.assign(stander_pointer, elements)
+                else:
+                    self.pointer_environment.define(stander_pointer, elements, False)
+            else:
+                raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")        
+    
     
     def visit_Hidden_list_creation(self, inst):
         line = inst.line
@@ -142,7 +147,7 @@ class Interpreter(ExprVisitor):
         value = self.evaluate(inst.value)
         line = inst.line
         
-        if (stander_variable == self.stdvar.ras) or (stander_variable == self.stdvar.rbs) or (stander_variable == self.stdvar.rcs) or (stander_variable == self.stdvar.rds) or (stander_variable == self.stdvar.rex):
+        if ((stander_variable == self.stdvar.ras) or (stander_variable == self.stdvar.rbs) or (stander_variable == self.stdvar.rcs) or (stander_variable == self.stdvar.rds) or (stander_variable == self.stdvar.res) or (stander_variable == self.stdvar.rfs) or (stander_variable == self.stdvar.rgs)) and (not isinstance(value, list)):
             if self.environment.is_defined(stander_variable):
                 self.environment.assign(stander_variable, value)
             else:
@@ -153,6 +158,18 @@ class Interpreter(ExprVisitor):
             else:
                 self.environment.define(self.stdvar.rdo_var, value, False)
             
+        elif (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res) and (isinstance(value, list)):
+            
+            if self.addr_environment.is_defined(stander_variable):
+                self.addr_environment.assign(stander_variable, value)
+            else:
+                self.addr_environment.define(stander_variable, value, False)
+            
+            if self.environment.is_defined(self.stdvar.rdo_var):
+                self.environment.assign(self.stdvar.rdo_var, value)
+            else:
+                self.environment.define(self.stdvar.rdo_var, value, False)
+        
         else:
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
         

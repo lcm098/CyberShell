@@ -105,6 +105,10 @@ def process_command(buffer):
             print(f"value error : [{err}]")
         except NotImplementedError as err:
             print(f"NotImplementedError : [{err}]")
+        except FileNotFoundError as err:
+            print("Compile Error : Unable to Find Target File to compile")
+        except Exception as err:
+            print(f"unknown system halt Error, but system safe : {err}")
         
     else:
         print(f"Command not recognized: {command}")

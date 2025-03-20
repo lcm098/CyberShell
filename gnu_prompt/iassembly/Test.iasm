@@ -1,6 +1,22 @@
+//					International Assembly Language
+
+"""
+Understand This Code
 
 section .text ||
-    mov ras, 55
-    mov ecx_res, %[#ras]
-    load fptr, ecx_res
+    mov ras, 55   			// 'ras' is a stander variable, which will be used to store frequent data. (ex : age = 17, name = "something")
+    mov ecx_res, %[#ras]		// 'ecx_res' is a stander pointer resolver, which will be use to remove "dataType, and memAddr" and make it a clean list 
+    load fptr, rdo_var		// 'fptr' is a special pointer resolver, which will be used to prepare the data to pass as function's arguments
+    				// 'rdo_var' is a current flow tracker variable, which can be use in debugging and it can also used as normal variable and (its 	
+    				    catogery belongs to stander variable but it behave something different)
+    
+    mov rbs, "Hello Anoop Boy"
+    mov rcs, true
+    mov ecx_res, %[#rbs, #rcs]
+    load fptr, ecx_res          // stander pointer resolver is a Great idea to use while preparing data to pass as function's arguments
+    				// one thing you may ask, why we always passing list to function. the asnswer is syntax, iasm always works in instructions with OpCode.
+    				// one thing you may ask, why we need stander pointer resolver? the answer is while initializing data in stander variable it stores
+    				data as like this (int, 55, 0x665539), this reason we need stander pointer resolver. 
 ||
+
+"""

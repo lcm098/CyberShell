@@ -102,10 +102,11 @@ class Interpreter(ExprVisitor):
         
         elements = []
         temp = []
-        if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr):
+        if self.is_special_pointer(stander_pointer):
                 
-            if (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res):
+            if self.is_stander_pointer(stander_variable):
                 temp = self.addr_environment.get(stander_variable)
+                
             elif (stander_variable == self.stdvar.rdo_var):
                 temp = self.environment.get(stander_variable)
                 
@@ -115,10 +116,8 @@ class Interpreter(ExprVisitor):
             if isinstance(temp, list):
                 for item in temp:
                     elements.append(item[0])
-                if self.pointer_environment.is_defined(stander_pointer):
-                    self.pointer_environment.assign(stander_pointer, elements)
-                else:
-                    self.pointer_environment.define(stander_pointer, elements, False)
+                self.define_in_pointer_environment(stander_pointer, elements)
+                return (stander_pointer, elements)
             else:
                 raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")        
     
@@ -132,10 +131,7 @@ class Interpreter(ExprVisitor):
             for item in range(len(buffer)):
                 elements.append(self.evaluate(buffer[item]))
             
-            if self.environment.is_defined(self.stdvar.rdo_var):
-                self.environment.assign(self.stdvar.rdo_var, (elements, "list", id(elements)))
-            else:
-                self.environment.define(self.stdvar.rdo_var, (elements, "list", id(elements)), False)
+            self.define_in_rdo_var(elements, False)
             return elements
         
         except Exception as err:
@@ -147,33 +143,83 @@ class Interpreter(ExprVisitor):
         value = self.evaluate(inst.value)
         line = inst.line
         
-        if ((stander_variable == self.stdvar.ras) or (stander_variable == self.stdvar.rbs) or (stander_variable == self.stdvar.rcs) or (stander_variable == self.stdvar.rds) or (stander_variable == self.stdvar.res) or (stander_variable == self.stdvar.rfs) or (stander_variable == self.stdvar.rgs)) and (not isinstance(value, list)):
-            if self.environment.is_defined(stander_variable):
-                self.environment.assign(stander_variable, value)
-            else:
-                self.environment.define(stander_variable, value, False)
+        if self.is_stander_variable(stander_variable) and not self.is_list(value):
+            self.define_in_environment(stander_variable, value, False)
             
-            if self.environment.is_defined(self.stdvar.rdo_var):
-                self.environment.assign(self.stdvar.rdo_var, value)
-            else:
-                self.environment.define(self.stdvar.rdo_var, value, False)
-            
-        elif (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res) and (isinstance(value, list)):
-            
-            if self.addr_environment.is_defined(stander_variable):
-                self.addr_environment.assign(stander_variable, value)
-            else:
-                self.addr_environment.define(stander_variable, value, False)
-            
-            if self.environment.is_defined(self.stdvar.rdo_var):
-                self.environment.assign(self.stdvar.rdo_var, value)
-            else:
-                self.environment.define(self.stdvar.rdo_var, value, False)
+        elif self.is_stander_pointer(stander_variable) and self.is_list(value):
+            self.define_in_addr_environment(stander_variable, value, False)
         
         else:
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
+    
+    def define_in_pointer_environment(self, stander_pointer, elements):
+        if self.pointer_environment.is_defined(stander_pointer):
+            self.pointer_environment.assign(stander_pointer, elements)
+        else:
+            self.pointer_environment.define(stander_pointer, elements, False)
+        
+        if self.environment.is_defined(self.stdvar.rdo_var):
+            self.environment.assign(self.stdvar.rdo_var, elements)
+        else:
+            self.environment.define(self.stdvar.rdo_var, elements, False)    
         
     
+    def is_special_pointer(self, stander_pointer):
+        if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr):
+            return True
+        else:
+            return False   
+    
+    def define_in_rdo_var(self, value, is_constant):
+        
+        if self.environment.is_defined(self.stdvar.rdo_var):
+            self.environment.assign(self.stdvar.rdo_var, value)
+        else:
+            self.environment.define(self.stdvar.rdo_var, value, is_constant)
+                
+    def define_in_addr_environment(self, stander_variable, value, is_constant):
+        if self.addr_environment.is_defined(stander_variable):
+            self.addr_environment.assign(stander_variable, value)
+        else:
+            self.addr_environment.define(stander_variable, value, is_constant)
+            
+        if self.environment.is_defined(self.stdvar.rdo_var):
+            self.environment.assign(self.stdvar.rdo_var, value)
+        else:
+            self.environment.define(self.stdvar.rdo_var, value, is_constant)
+            
+       
+    def define_in_environment(self, stander_variable, value, is_constant):
+        if self.environment.is_defined(stander_variable):
+            self.environment.assign(stander_variable, value)
+        else:
+            self.environment.define(stander_variable, value, is_constant)
+            
+        if self.environment.is_defined(self.stdvar.rdo_var):
+            self.environment.assign(self.stdvar.rdo_var, value)
+        else:
+            self.environment.define(self.stdvar.rdo_var, value, is_constant)
+            
+            
+    def is_stander_pointer(self, stander_variable):
+        if (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res):
+            return True
+        else:
+            return False
+        
+    def is_stander_variable(self, stander_variable):
+        if (stander_variable == self.stdvar.ras) or (stander_variable == self.stdvar.rbs) or (stander_variable == self.stdvar.rcs) or (stander_variable == self.stdvar.rds) or (stander_variable == self.stdvar.res) or (stander_variable == self.stdvar.rfs) or (stander_variable == self.stdvar.rgs):
+            return True
+        else:
+            return False
+        
+    def is_list(item):
+        if isinstance(item, list):
+            return True
+        else:
+            return False
+        
+        
     def visit_identifier(self, inst):
         identifier = inst.identifier.lexeme
         line = inst.line

@@ -266,6 +266,12 @@ class Parser:
             line = self.peek().line
             expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
             return Expr.Identifier(expr, line)
+        
+        if self.match(TokenType.PERCENTAGE):
+            line = self.peek()
+            self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden array subset")
+            while not self.match(TokenType.RIGHT_BRACKET):
+                elements = self.expression()
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

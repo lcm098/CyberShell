@@ -75,6 +75,7 @@ EOF = "EOF"  # Added missing EOF token type
 SET = "SET"
 INJECT = "INJECT"
 HANT_OPERATOR = "HANT_OPERATOR"
+PERCENTAGE = "PERCENTAGE"
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -84,7 +85,7 @@ TOKEN_TYPES = [
     TEXT, DATA, BSS, DOUBLE_OR, READ, WRITE, RETURN, EXEC, FIPTR, INC, DEC, LOOP,
     ADDRESS_OF_OPERATOR, CONDITIONAL_AND, BANG, CONDITIONAL_OR, BANG_EQUAL, EQUAL_EQUAL,
     DATA_EQUAL, TRUE, FALSE, NIL, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
-    INVOKE, SET, GET, INJECT, HANT_OPERATOR
+    INVOKE, SET, GET, INJECT, HANT_OPERATOR, PERCENTAGE
 ]
 
 keywords = {
@@ -278,6 +279,9 @@ class Lexer:
         elif c == '#':
             self.add_token(HANT_OPERATOR)    
         
+        elif c == '%':
+            self.add_token(PERCENTAGE)
+        
         elif c == "&":
             self.add_token(CONDITIONAL_AND)
         elif c == '(':
@@ -424,6 +428,7 @@ class TokenType:
     LESS_EQUAL = "LESS_EQUAL"
     TRUE = "TRUE"
     FALSE = "FALSE"
+    PERCENTAGE = "PERCENTAGE"
     NIL = "NIL"
     PUSHA = "PUSHA"
     POPA = "POPA"

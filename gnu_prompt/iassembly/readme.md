@@ -4,29 +4,28 @@
 section .text ||
 
     mov ras, "Hello"  // move "Hello" string to ras (vs variable)
-    load fptr, @[ras] // load vs-var as (array group) to function pointer
+    load fptr, %[#ras] // load vs-var as (array group) to function pointer
     call write, rdo_var        // call write function to print it
     unload fptr       // nice way to unload fptr, every time after load
 
 
-    
 
     link arr, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    load fptr, @[arr]
+    load fptr, %[#arr]
     call write, rdo_var
     unload fptr
 
     link dict, {"ram":1, "shyam":2, "mohan":3}
-    load fptr, @[dict]
+    load fptr, %[#dict]
     call write, rdo_var
     unload fptr
 
     link list, ["anoop", 1, false, nil]
-    load fptr, @[list]
+    load fptr, %[#list]
     call write, rdo_var
     unload fptr
 
-    load fptr, @[age, gender] 
+    load fptr, [#age, #gender] 
     call read, rdo_var                //call stander read for input  
 
     // introduction ecx (which is result resolver variable)
@@ -38,20 +37,20 @@ section .text ||
     if rdo_var, true
     [
         link name
-        load fptr, @["Hello ", name, " You Can Drive!"]
+        load fptr, %["Hello ", #name, " You Can Drive!"]
         call write, rdo_var
         unload fptr
     ]
     if rdo_var, false
     [
-        load fptr, @["Hello ", name, " You Can Not Drive"]
+        load fptr, %["Hello ", name, " You Can Not Drive"]
         call write, rdo_var
         unload fptr
     ]
 
     mov ras, 3
     mov rbs, 4
-    load fptr, @[ras, rbs]
+    load fptr, %[#ras, #rbs]
     call add_num
     mov rcs, vptr  // 7 value will store in rcs special variable
 

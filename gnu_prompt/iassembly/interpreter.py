@@ -51,8 +51,8 @@ class ExprVisitor:
     def visit_identifier(self, inst):
         raise NotImplementedError("visit_identifier must be implemented by a subclass")
         
-    def visit_Hidden_array_creation(self, inst):
-        raise NotImplementedError("visit_Hidden_array_creation must be implemented by a subclass")
+    def visit_Hidden_list_creation(self, inst):
+        raise NotImplementedError("visit_Hidden_list_creation must be implemented by a subclass")
     
     def visit_Load_instruction(self, inst):
         raise NotImplementedError("visit_Load_instruction must be implemented by a subclass")
@@ -104,34 +104,35 @@ class Interpreter(ExprVisitor):
         if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr):
             if stander_var == self.stdvar.rdo_var:
                 temp = self.environment.get(stander_var)
-                if temp[1] == "array":
-                    for item in temp[0]:
+                
+                if isinstance(temp, list):
+                    for item in temp:
                         elements.append(item[0])
                     if self.pointer_environment.is_defined(stander_pointer):
                         self.pointer_environment.assign(stander_pointer, elements)
                     else:
                         self.pointer_environment.define(stander_pointer, elements, False)
-                    return (stander_pointer, elements)
                 else:
-                    raise InstructionError(f"Looking Like {temp[0]} is not an array, why?. \n\tOn Line=[{line}]")
+                    raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")
             else:
                 raise InstructionError(f"Use Runtime-Read-Only Variable (rdo_var) at the place of '{stander_var}'. \t\tOn Line=[{line}]")
         
     
-    def visit_Hidden_array_creation(self, inst):
+    def visit_Hidden_list_creation(self, inst):
         line = inst.line
         buffer = inst.elements_buff
         
         try:
             elements = []
-            for item in range(buffer):
-                print(item)
+            for item in range(len(buffer)):
+                elements.append(self.evaluate(buffer[item]))
             
             if self.environment.is_defined(self.stdvar.rdo_var):
-                self.environment.assign(self.stdvar.rdo_var, (elements, "array", id(elements)))
+                self.environment.assign(self.stdvar.rdo_var, (elements, "list", id(elements)))
             else:
-                self.environment.define(self.stdvar.rdo_var, (elements, "array", id(elements)), False)
-                
+                self.environment.define(self.stdvar.rdo_var, (elements, "list", id(elements)), False)
+            return elements
+        
         except Exception as err:
             raise InstructionError(f"an error occurred \n\tOn Line=[{line}]")
         
@@ -151,10 +152,9 @@ class Interpreter(ExprVisitor):
                 self.environment.assign(self.stdvar.rdo_var, value)
             else:
                 self.environment.define(self.stdvar.rdo_var, value, False)
-        
+            
         else:
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
-        return (stander_variable, value) # have to remove this line
         
     
     def visit_identifier(self, inst):

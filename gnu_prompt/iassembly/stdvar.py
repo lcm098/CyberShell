@@ -34,4 +34,3 @@ class StanderVariable:
     dd = "dd"
     dl = "dl"
     dr = "dr"
-    da = "da"

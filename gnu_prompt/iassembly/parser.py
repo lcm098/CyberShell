@@ -152,16 +152,16 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_mov_instruction(self)
     
-    class HiddenArrayCreation:
+    class HiddenListCreation:
         def __init__(self, line, elements_buff):
             self.line = line
             self.elements_buff = elements_buff
             
         def __repr__(self):
-            return f"HiddenArrayCreation=({self.line}, {self.elements_buff})"
+            return f"HiddenListCreation=({self.line}, {self.elements_buff})"
 
         def accept(self, visitor):
-            return visitor.visit_Hidden_array_creation(self)
+            return visitor.visit_Hidden_list_creation(self)
         
     class LoadInstruction:
         def __init__(self, stander_pointer, stander_var, line):
@@ -301,16 +301,17 @@ class Parser:
         
         if self.match(TokenType.PERCENTAGE):
             line = self.peek().line
-            self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden array subset")
+            self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden list subset")
             elements_buff = []
             while True:
                 element = self.expression()
+                elements_buff.append(element)
                 if not self.check(TokenType.COMMA):
                     break
-                self.consume(TokenType.COMMA, "Expected ',' while resolving hidden array element")
-                elements_buff.append(element)
-            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while making hidden array subset")
-            return Expr.HiddenArrayCreation(line, elements_buff)
+                self.consume(TokenType.COMMA, "Expected ',' while resolving hidden list element")
+                
+            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while making hidden list subset")
+            return Expr.HiddenListCreation(line, elements_buff)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

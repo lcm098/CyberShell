@@ -1,5 +1,5 @@
-"Hello"
-123
-33.3
-true
-nil
+section .text ||
+    mov ras, 55
+    mov rbs, %[#ras]
+    load fptr, rdo_var
+||

@@ -87,7 +87,10 @@ def process_command(buffer):
             
                 results = interpreter.interpret(ast)
                 for result in results:
-                    print(result)
+                    if result is not None:
+                        print(result)
+                    else:
+                        pass
                 main_prompt()
             else:
                 print("too many arguments while executing international-assembly")

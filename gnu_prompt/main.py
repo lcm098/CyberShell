@@ -100,6 +100,8 @@ def process_command(buffer):
             print(f"instruction error : [{err}]")
         except ValueError as err:
             print(f"value error : [{err}]")
+        except NotImplementedError as err:
+            print(f"NotImplementedError : [{err}]")
         
     else:
         print(f"Command not recognized: {command}")

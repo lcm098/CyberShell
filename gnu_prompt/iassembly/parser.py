@@ -152,6 +152,28 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_mov_instruction(self)
     
+    class HiddenArrayCreation:
+        def __init__(self, line, elements_buff):
+            self.line = line
+            self.elements_buff = elements_buff
+            
+        def __repr__(self):
+            return f"HiddenArrayCreation=({self.line}, {self.elements_buff})"
+
+        def accept(self, visitor):
+            return visitor.visit_Hidden_array_creation(self)
+        
+    class LoadInstruction:
+        def __init__(self, stander_pointer, stander_var, line):
+            self.line = line
+            self.stander_pointer = stander_pointer
+            self.stander_var = stander_var
+            
+        def __repr__(self):
+            return f"Load Instruction=({self.line}, {self.stander_pointer}, {self.stander_var})"
+
+        def accept(self, visitor):
+            return visitor.visit_Load_instruction(self)
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -189,7 +211,17 @@ class Parser:
         elif self.match(TokenType.MOV):
             return self.handle_mov_instruction()
         
+        elif self.match(TokenType.LOAD):
+            return self.handle_load_instruction()
+        
         return self.expression()
+
+    def handle_load_instruction(self):
+        line = self.peek().line
+        stander_pointer = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer linker")
+        self.consume(TokenType.COMMA, "Expected ',' after identifier")
+        stander_var = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer linker")
+        return Expr.LoadInstruction(stander_pointer, stander_var, line)
 
     def handle_mov_instruction(self):
         line = self.peek().line
@@ -270,8 +302,15 @@ class Parser:
         if self.match(TokenType.PERCENTAGE):
             line = self.peek()
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden array subset")
-            while not self.match(TokenType.RIGHT_BRACKET):
-                elements = self.expression()
+            elements_buff = []
+            while True:
+                element = self.expression()
+                if not self.check(TokenType.COMMA):
+                    break
+                self.consume(TokenType.COMMA, "Expected ',' while resolving hidden array element")
+                elements_buff.append(element)
+            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while making hidden array subset")
+            return Expr.HiddenArrayCreation(line, elements_buff)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

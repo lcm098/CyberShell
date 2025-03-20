@@ -4,7 +4,7 @@
 section .text ||
 
     mov ras, "Hello"  // move "Hello" string to ras (vs variable)
-    load fptr, %[#ras] // load vs-var as (array group) to function pointer
+    load fptr, %[#ras] // load ras-var as (array group) to function pointer var
     call write, rdo_var        // call write function to print it
     unload fptr       // nice way to unload fptr, every time after load
 

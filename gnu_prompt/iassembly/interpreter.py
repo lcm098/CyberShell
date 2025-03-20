@@ -213,7 +213,7 @@ class Interpreter(ExprVisitor):
         else:
             return False
         
-    def is_list(item):
+    def is_list(self, item):
         if isinstance(item, list):
             return True
         else:

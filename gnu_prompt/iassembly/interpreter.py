@@ -102,8 +102,11 @@ class Interpreter(ExprVisitor):
         self.environment = Environment()
         self.StanderLib = StanderLibrary()
         
+    def visit_identifier(self, expr):
+        return (expr.identifier.lexeme, "identifier", id(expr.identifier))
+        
     def visit_register(self, expr):
-        return expr.register
+        return (expr.register, "register", id(expr.register))
         
     def visit_mov_instruction(self, inst):
         

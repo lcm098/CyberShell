@@ -151,6 +151,17 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_register(self)
         
+        
+    class Identifier:
+        def __init__(self, ident):
+            self.identifier = ident
+        
+        def __repr__(self):
+            return f"Register(block={self.identifier})"
+        
+        def accept(self, visitor):
+            return visitor.visit_identifier(self)
+        
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -306,7 +317,10 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
         
-        
+        if self.match(TokenType.IDENTIFIER):
+            self.past(distance=1)
+            ident = self.consume(TokenType.IDENTIFIER, "Expected an Identifier")
+            return Expr.Identifier(ident)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

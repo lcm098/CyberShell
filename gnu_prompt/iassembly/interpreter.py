@@ -121,12 +121,11 @@ class Interpreter(ExprVisitor):
         elements = expr.elements
         line = expr.line
         
-
         clean_list = []
         for item in elements:
-            print(self.evaluate(item))
+            clean_list.append(self.is_opponent_y_regis(self.evaluate(item), line))
         
-        print(1, clean_list)
+        print("DEBUG: ", clean_list)
         return clean_list
     
     def visit_load_instruction(self, inst):

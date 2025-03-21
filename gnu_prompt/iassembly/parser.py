@@ -1,6 +1,5 @@
 from iassembly.lexer import *
 from iassembly.interpreter import *
-from iassembly.stdvar import *
 
 class Expr:
         

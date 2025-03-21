@@ -121,11 +121,14 @@ class Interpreter(ExprVisitor):
         elements = expr.elements
         line = expr.line
         
+        print(0, elements)
+        
         clean_list = []
         for item in elements:
             value = self.is_opponent_y_regis(item, line)
             clean_list.append(value)
         
+        print(1, clean_list)
         return clean_list
     
     def visit_load_instruction(self, inst):
@@ -191,7 +194,7 @@ class Interpreter(ExprVisitor):
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     def is_opponent_y_regis(self, y, line):
-        print(y)
+        
         if y[1] in ("register", "identifier"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)

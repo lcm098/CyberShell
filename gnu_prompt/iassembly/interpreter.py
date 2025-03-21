@@ -144,7 +144,7 @@ class Interpreter(ExprVisitor):
         
         elements = []
         temp = []
-        if self.is_special_pointer(stander_pointer):
+        if stander_pointer == self.stdvar.fptr:
                 
             if self.is_stander_pointer(stander_variable):
                 temp = self.addr_environment.get(stander_variable)
@@ -167,7 +167,7 @@ class Interpreter(ExprVisitor):
     def visit_Hidden_list_creation(self, inst):
         line = inst.line
         buffer = inst.elements_buff
-        print(buffer)
+        
         try:
             elements = []
             for item in range(len(buffer)):
@@ -185,12 +185,14 @@ class Interpreter(ExprVisitor):
         value = self.evaluate(inst.value)
         line = inst.line
         
-        if self.is_stander_variable(stander_variable) and not self.is_list(value):
+        if self.is_stander_variable(stander_variable):
             self.define_in_environment(stander_variable, value, False)
             
-        elif self.is_stander_pointer(stander_variable) and self.is_list(value):
+        elif self.is_stander_pointer(stander_variable):
             self.define_in_addr_environment(stander_variable, value, False)
         
+        elif self.is_special_pointer(stander_variable):
+             self.define_in_pointer_environment(stander_variable, value)
         else:
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
         
@@ -208,11 +210,12 @@ class Interpreter(ExprVisitor):
         
     
     def is_special_pointer(self, stander_pointer):
-        if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr) or (stander_pointer == self.stdvar.cptr):
+        if (stander_pointer == self.stdvar.vptr) or (stander_pointer == self.stdvar.cptr):
             return True
         else:
             return False   
     
+
     def define_in_rdo_var(self, value, is_constant):
         
         if self.environment.is_defined(self.stdvar.rdo_var):

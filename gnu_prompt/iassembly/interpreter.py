@@ -115,9 +115,8 @@ class Interpreter(ExprVisitor):
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
             
-            if self.is_opponent_y_regis(opponent_y, line):
-                self.push_in_environment(opponent_x, opponent_y)
-            
+
+            self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
             print(opponent_x, self.environment.get(opponent_x))
             
         except Exception as err:

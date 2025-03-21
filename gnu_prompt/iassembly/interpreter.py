@@ -174,8 +174,7 @@ class Interpreter(ExprVisitor):
         
         clean_list = []
         for item in opponent_y:
-            value = self.is_opponent_y_regis(item, line)
-            clean_list.append(value[0])
+            clean_list.append(self.is_opponent_y_regis(self.evaluate(item), line))
         
         print("DEBUG 2:", clean_list)
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
@@ -218,9 +217,9 @@ class Interpreter(ExprVisitor):
     def push_in_environment(self, x, y, is_const=False):
         
         if self.environment.is_defined(x):
-            self.environment.assign(x, y)
+            self.environment.assign(x[0], y)
         else:
-            self.environment.define(x, y, is_const)
+            self.environment.define(x[0], y, is_const)
             
         
     def is_list(self, item):

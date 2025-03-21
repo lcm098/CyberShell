@@ -128,7 +128,7 @@ class Interpreter(ExprVisitor):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
                 if value[1] == "register":
-                    self.is_opponent_y_regis(value, line)
+                    return self.is_opponent_y_regis(value, line)
                 else:
                     return value
             else:

@@ -105,7 +105,7 @@ class Interpreter(ExprVisitor):
     def visit_register(self, expr):
         return expr.register
         
-    def visit_move_instruction(self, inst):
+    def visit_mov_instruction(self, inst):
         
         try:
             line = inst.line

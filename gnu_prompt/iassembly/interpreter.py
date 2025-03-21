@@ -125,16 +125,17 @@ class Interpreter(ExprVisitor):
     def is_opponent_y_regis(self, y, line):
         
         if y[1] in ("register", "identifier"):
+            print("Yes, 1", y)
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
                 if value[1] == "register":
+                    print("god", value)
                     return self.is_opponent_y_regis(value, line)
                 else:
                     return value
             else:
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
-            print(y, "catched")
             return y
             
     

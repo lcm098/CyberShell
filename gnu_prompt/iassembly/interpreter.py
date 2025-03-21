@@ -173,7 +173,6 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         clean_list = []
-        var = self.evaluate(opponent_y)
         
         print("DEBUG 2:", opponent_y)
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):

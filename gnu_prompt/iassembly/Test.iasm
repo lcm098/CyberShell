@@ -1,10 +1,7 @@
-
 section .text ||
 
-    mov ras, "danishk sinha is Great"
-    mov ecx_res, [#ras]
-
-    load fptr, rdo_var
-    call write, fptr
-
+	compute vptr, [(3 + 2) * 5]
+	mov edx_res, [#vptr]
+	load fptr, edx_res
+	call write, fptr
 ||

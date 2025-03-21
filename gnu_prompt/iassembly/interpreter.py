@@ -107,7 +107,7 @@ class Interpreter(ExprVisitor):
     def visit_Compute_instruction_call(self, inst):
         line = inst.line
         pointer_resolver = inst.pointer_resolver.lexeme
-        expression = inst.expression.lexeme
+        expression = inst.expression
         
         if pointer_resolver == self.stdvar.vptr:
             result = self.evaluate(expression)
@@ -306,8 +306,6 @@ class Interpreter(ExprVisitor):
     def visit_binary_expr(self, expr):
         left = self.evaluate(expr.left)[0]
         right = self.evaluate(expr.right)[0]
-        
-        print(expr.operator)
 
         if expr.operator.lexeme == '+':
             _eval_ = left + right

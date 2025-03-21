@@ -84,7 +84,8 @@ def process_command(buffer):
                 
                 parser = Parser(token)
                 ast = parser.parse()
-            
+
+                
                 results = interpreter.interpret(ast)
                 for result in results:
                     if result is not None:

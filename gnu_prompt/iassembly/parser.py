@@ -8,7 +8,7 @@ class Expr:
         def __init__(self, left, operator, right):
             self.left = left
             self.operator = operator
-            self.right = right  
+            self.right = right
         
         def __repr__(self):
             return f"Binary(left={self.left}, operator={self.operator}, right={self.right})"
@@ -333,7 +333,7 @@ class Parser:
         return expr
 
     def unary(self):
-        if self.match(TokenType.BANG):
+        if self.match(TokenType.BANG, TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
             return Expr.Unary(operator, right)

@@ -184,8 +184,11 @@ class Interpreter(ExprVisitor):
             line = inst.line
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
-        
-            self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
+
+            if isinstance(opponent_y, list):
+                self.push_in_environment(opponent_x, opponent_y)
+            else:    
+                self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
             
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")

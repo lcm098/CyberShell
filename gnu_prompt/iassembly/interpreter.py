@@ -192,8 +192,6 @@ class Interpreter(ExprVisitor):
             self.define_in_addr_environment(stander_variable, value, False)
         
         else:
-            print(stander_variable)
-            print(value)
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
         
     
@@ -308,6 +306,8 @@ class Interpreter(ExprVisitor):
     def visit_binary_expr(self, expr):
         left = self.evaluate(expr.left)[0]
         right = self.evaluate(expr.right)[0]
+        
+        print(expr.operator)
 
         if expr.operator.lexeme == '+':
             _eval_ = left + right

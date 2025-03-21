@@ -191,7 +191,7 @@ class Interpreter(ExprVisitor):
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     def is_opponent_y_regis(self, y, line):
-        
+        print(y)
         if y[1] in ("register", "identifier"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)

@@ -117,7 +117,8 @@ class Interpreter(ExprVisitor):
             
             if self.is_opponent_y_regis(opponent_y, line):
                 self.push_in_environment(opponent_x, opponent_y)
-                return opponent_y
+            
+            print(opponent_x, self.environment.get(opponent_x))
             
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
@@ -125,11 +126,9 @@ class Interpreter(ExprVisitor):
     def is_opponent_y_regis(self, y, line):
         
         if y[1] in ("register", "identifier"):
-            print("Yes, 1", y)
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
-                if y[1]("register", "identifier"):
-                    print("god", value)
+                if y[1] in ("register", "identifier"):
                     return self.is_opponent_y_regis(value, line)
                 else:
                     return value

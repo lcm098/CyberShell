@@ -124,7 +124,7 @@ class Interpreter(ExprVisitor):
         
     def is_opponent_y_regis(self, y, line):
         
-        if (y[1] == "register" or y[1] == "identifier"):
+        if y[1] in ("register", "identifier"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
                 if value[1] == "register":

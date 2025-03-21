@@ -173,7 +173,8 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
-            self.push_in_environment(opponent_x, list(self.is_opponent_y_regis(opponent_y, line)))
+            self.push_in_environment(opponent_x, opponent_y)
+            print("DEBUG 2:", opponent_y)
         else:
             raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
             

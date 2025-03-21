@@ -86,6 +86,21 @@ MODULUS = "MODULUS"
 AT_THE_RATE = "AT_THE_RATE"
 COMPUTE = "COMPUTE"
 
+EAX = "EAX"
+EBX = "EBX"
+ECX = "ECX"
+EDX = "EDX"
+EEX = "EEX"
+EFX = "EFX"
+EXX = "EXX"
+EZX = "EZX"
+FPTR = "FPTR"
+VPTR = "VPTR"
+CPTR = "CPTR"
+DD = "DD"
+DL = "DL"
+DR = "DR"
+
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
     CALL, PUSH, POP, LOAD, STORE, UNLOAD, UNSTORE,
@@ -95,10 +110,25 @@ TOKEN_TYPES = [
     ADDRESS_OF_OPERATOR, CONDITIONAL_AND, BANG, CONDITIONAL_OR, BANG_EQUAL, EQUAL_EQUAL,
     DATA_EQUAL, TRUE, FALSE, NIL, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
     INVOKE, SET, GET, INJECT, HANT_OPERATOR, POW, SQRT, CEIL, FLOOR,
-    PLUS, MINUS, SLASH, STAR, MODULUS, AT_THE_RATE, COMPUTE
+    PLUS, MINUS, SLASH, STAR, MODULUS, AT_THE_RATE, COMPUTE, EAX, EBX, ECX, EDX, EFX,
+    EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR
 ]
 
 keywords = {
+    "eax" : EAX,
+    "ebx" : EBX,
+    "ecx" : ECX,
+    "edx" : EDX,
+    "eex" : EEX,
+    "efx" : EFX,
+    "exx" : EXX,
+    "ezx" : EZX,
+    "fptr" : FPTR,
+    "vptr" : VPTR,
+    "cptr" : CPTR,
+    "dl" : DL,
+    "dd" : DD,
+    "dr" : DR,
     "call" : CALL,
     "mov" : MOV,
     "fiptr" : FIPTR,
@@ -471,3 +501,18 @@ class TokenType:
     MODULUS = "MODULUS"
     AT_THE_RATE = "AT_THE_RATE"
     COMPUTE = "COMPUTE"
+    
+    EAX = "EAX"
+    EBX = "EBX"
+    ECX = "ECX"
+    EDX = "EDX"
+    EEX = "EEX"
+    EFX = "EFX"
+    EXX = "EXX"
+    EZX = "EZX"
+    FPTR = "FPTR"
+    VPTR = "VPTR"
+    CPTR = "CPTR"
+    DD = "DD"
+    DL = "DL"
+    DR = "DR"

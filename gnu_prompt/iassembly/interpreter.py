@@ -1,6 +1,5 @@
 from iassembly.parser import *
 from iassembly.buffer import *
-from iassembly.stdvar import StanderVariable
 from iassembly.stdlib import *
 
 class ExprVisitor:
@@ -70,6 +69,9 @@ class ExprVisitor:
     def visit_Compute_instruction_call(self, inst):
         raise NotImplementedError("visit_Compute_instruction_call must be implemented by a subclass")
 
+    def visit_register(self, expr):
+        raise NotImplementedError("visit_register must be implemented by a subclass")
+
 
 class NotImplementedError(Exception):
     def __init__(self, message):
@@ -98,15 +100,22 @@ class InstructionError(Exception):
 class Interpreter(ExprVisitor):
     def __init__(self):
         self.environment = Environment()
-        self.stdvar = StanderVariable()
         self.StanderLib = StanderLibrary()
+        
+    def visit_register(self, expr):
+        return expr.register
         
     def visit_move_instruction(self, inst):
         
-        opponent_x = inst.opponent_x.lexeme
-        opponent_y = self.evaluate(inst.opponent_y)
-        self.push_in_environment(opponent_x, opponent_y)
-        return (opponent_x, opponent_y)
+        try:
+            line = inst.line
+            opponent_x = self.evaluate(inst.opponent_x)
+            opponent_y = self.evaluate(inst.opponent_y)
+            
+            self.push_in_environment(opponent_x, opponent_y)
+            return (opponent_x, opponent_y)
+        except Exception as err:
+            raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     
     def push_in_environment(self, x, y, is_const=False):

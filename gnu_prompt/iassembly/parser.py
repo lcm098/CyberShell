@@ -142,6 +142,16 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_mov_instruction(self)
         
+    class Register:
+        def __init__(self, register):
+            self.register = register
+        
+        def __repr__(self):
+            return f"Register(block={self.register})"
+        
+        def accept(self, visitor):
+            return visitor.visit_register(self)
+        
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -261,6 +271,21 @@ class Parser:
         return self.primary()
 
     def primary(self):
+    
+        if self.match(TokenType.EAX):
+            return Expr.Register("eax")
+        if self.match(TokenType.EBX):
+            return Expr.Register("ebx")
+        if self.match(TokenType.ECX):
+            return Expr.Register("ecx")
+        if self.match(TokenType.EDX):
+            return Expr.Register("edx")
+        if self.match(TokenType.EFX):
+            return Expr.Register("efx")
+        if self.match(TokenType.EXX):
+            return Expr.Register("exx")
+        if self.match(TokenType.EZX):
+            return Expr.Register("ezx")
         
         if self.match(TokenType.INT):
             return Expr.INT(self.previous().literal)

@@ -167,7 +167,7 @@ class Interpreter(ExprVisitor):
     def visit_Hidden_list_creation(self, inst):
         line = inst.line
         buffer = inst.elements_buff
-        
+        print(buffer)
         try:
             elements = []
             for item in range(len(buffer)):

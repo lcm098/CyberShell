@@ -191,8 +191,18 @@ class Interpreter(ExprVisitor):
         elif self.is_stander_pointer(stander_variable) and self.is_list(value):
             self.define_in_addr_environment(stander_variable, value, False)
         
+        elif self.special_pointer(stander_variable):
+            self.define_in_pointer_environment(stander_variable, value)
         else:
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
+    
+    
+    def special_pointer(self, stander_variable):
+        if self.stdvar.vptr == stander_variable or self.stdvar.cptr == stander_variable:
+            return True
+        else:
+            return False
+        
     
     def define_in_pointer_environment(self, stander_pointer, elements):
         if self.pointer_environment.is_defined(stander_pointer):

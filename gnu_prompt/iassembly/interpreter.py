@@ -121,12 +121,10 @@ class Interpreter(ExprVisitor):
         elements = expr.elements
         line = expr.line
         
-        print(0, elements)
-        
+
         clean_list = []
         for item in elements:
-            value = self.is_opponent_y_regis(item, line)
-            clean_list.append(value)
+            print(item)
         
         print(1, clean_list)
         return clean_list

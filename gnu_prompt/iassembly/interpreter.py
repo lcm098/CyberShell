@@ -192,6 +192,8 @@ class Interpreter(ExprVisitor):
             self.define_in_addr_environment(stander_variable, value, False)
         
         else:
+            print(stander_variable)
+            print(value)
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
         
     

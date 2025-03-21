@@ -67,6 +67,9 @@ class ExprVisitor:
     def visit_System_function_call(self, inst):
         raise NotImplementedError("visit_System_function_call must implement as a method")
 
+    def visit_Compute_instruction_call(self, inst):
+        raise NotImplementedError("visit_Compute_instruction_call must be implemented by a subclass")
+
 
 class NotImplementedError(Exception):
     def __init__(self, message):
@@ -99,16 +102,29 @@ class Interpreter(ExprVisitor):
         self.stdvar = StanderVariable()
         self.addr_environment = AddressResolverStructure()
         self.StanderLib = StanderLibrary()
+        
+    
+    def visit_Compute_instruction_call(self, inst):
+        line = inst.line
+        pointer_resolver = inst.pointer_resolver.lexeme
+        expression = inst.expression.lexeme
+        
+        if pointer_resolver == self.stdvar.vptr:
+            result = self.evaluate(expression)
+            self.define_in_pointer_environment(pointer_resolver, result)
+        else:
+            raise InstructionError(f"{pointer_resolver} is a looking like 'vptr', which is very suitable. \n\tOn Line=[{line}]")
+    
     
     def visit_System_function_call(self, inst):
         line = inst.line
         function_call_name = inst.function_call.lexeme
-        pointer_resolver = inst.pointer_resolver.lexeme
+        pointer_linker = inst.pointer_linker.lexeme
         
         actual_args = []
         
-        if self.pointer_environment.is_defined(pointer_resolver) and pointer_resolver == self.stdvar.fptr:
-            actual_args = self.pointer_environment.get(pointer_resolver)
+        if self.pointer_environment.is_defined(pointer_linker) and pointer_linker == self.stdvar.fptr:
+            actual_args = self.pointer_environment.get(pointer_linker)
             if self.is_list(actual_args):
                 if self.StanderLib.check_right_system_function(function_call_name):
                     self.StanderLib.call_impropriated_function(function_call_name, actual_args)
@@ -191,7 +207,7 @@ class Interpreter(ExprVisitor):
         
     
     def is_special_pointer(self, stander_pointer):
-        if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr):
+        if (stander_pointer == self.stdvar.fptr) or (stander_pointer == self.stdvar.vptr) or (stander_pointer == self.stdvar.cptr):
             return True
         else:
             return False   

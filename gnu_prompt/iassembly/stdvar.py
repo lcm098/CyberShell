@@ -24,11 +24,7 @@ class StanderVariable:
     # pointer variable
     fptr = "fptr"
     vptr = "vptr"
-    ras_ptr = "ras_ptr"
-    rbs_ptr = "rbs_ptr"
-    rcs_ptr = "rcs_ptr"
-    rds_ptr = "rds_ptr"
-    rex_ptr = "rex_ptr"
+    cptr = "cptr"
 
     # track variable
     rdo_var = "rdo_var"

@@ -177,16 +177,30 @@ class Expr:
         
     
     class FunctionCallInstruction:
-        def __init__(self, function_call, pointer_resolver, line):
+        def __init__(self, function_call, pointer_linker, line):
             self.line = line
             self.function_call = function_call
-            self.pointer_resolver = pointer_resolver
+            self.pointer_linker = pointer_linker
             
         def __repr__(self):
-            return f"Call Instruction=({self.line}, {self.function_call}, {self.pointer_resolver})"
+            return f"Call Instruction=({self.line}, {self.function_call}, {self.pointer_linker})"
         
         def accept(self, visitor):
             return visitor.visit_System_function_call(self)
+        
+    
+    class ComputeCallInstruction:
+        def __init__(self, pointer_resolver, expression, line):
+            self.pointer_resolver = pointer_resolver
+            self.expression = expression
+            self.line = line
+        
+        def __repr__(self):
+            return f"Compute Instruction=({self.line}, {self.pointer_resolver}, {self.expression})"
+        
+        def accept(self, visitor):
+            return visitor.visit_Compute_instruction_call(self)
+        
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -230,15 +244,28 @@ class Parser:
         elif self.match(TokenType.CALL):
             return self.handle_function_call()
         
+        elif self.match(TokenType.COMPUTE):
+            return self.handle_compute_instruction()
+        
         return self.expression()
 
+
+    def handle_compute_instruction(self):
+        line = self.peek().line
+        pointer_resolver = self.consume(TokenType.IDENTIFIER, "Expected a 'Pointer Resolver Variable'")
+        self.consume(TokenType.COMMA, "Expected ',' after pointer-resolver")
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' while writing computation expression")
+        expression = self.expression()
+        self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while writing computation expression")
+        return Expr.ComputeCallInstruction(pointer_resolver, expression, line)
+        
 
     def handle_function_call(self):
         line = self.peek().line
         function_call = self.consume(TokenType.IDENTIFIER, "Expected a 'System Function Call Name'")
         self.consume(TokenType.COMMA, "Expected ',' after function call")
-        pointer_resolver = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as list type")
-        return Expr.FunctionCallInstruction(function_call, pointer_resolver, line)
+        pointer_linker = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as list type")
+        return Expr.FunctionCallInstruction(function_call, pointer_linker, line)
 
     def handle_load_instruction(self):
         line = self.peek().line

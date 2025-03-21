@@ -172,9 +172,9 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        clean_list = []
+        clean_list = self.is_opponent_y_regis(opponent_y, line)
         
-        print("DEBUG 2:", opponent_y)
+        print("DEBUG 2:", clean_list)
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
             self.push_in_environment(opponent_x, opponent_y)
         else:

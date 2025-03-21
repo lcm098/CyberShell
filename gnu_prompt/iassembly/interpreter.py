@@ -118,7 +118,7 @@ class Interpreter(ExprVisitor):
         return (expr.pointer, "cptr", id(expr.pointer))
     
     def visit_make_hidden_list(self, expr):
-        elements = expr.elements
+        elements = self.evaluate(expr.elements)
         line = expr.line
         
 

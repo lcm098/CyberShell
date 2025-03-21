@@ -129,77 +129,18 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_unknown_block(self)
         
-    class Identifier:
-        def __init__(self, identifier, line):
-            self.identifier = identifier
-            self.line = line
-            
-        def __repr__(self):
-            return f"IDENTIFIER = ({self.identifier}, line={self.line})"
-        
-        def accept(self, visitor):
-            return visitor.visit_identifier(self)
         
     class MovInstruction:
-        def __init__(self, stander_var, value, line):
-            self.stander_var = stander_var
-            self.value = value
+        def __init__(self, opponent_x, opponent_y, line):
+            self.opponent_x = opponent_x
+            self.opponent_y = opponent_y
             self.line = line
-            
+        
         def __repr__(self):
-            return f"Mov Instruction = ({self.stander_var}, {self.value}, line={self.line})"
+            return f"mov instruction=({self.opponent_x}, {self.opponent_x}, {self.line})"
         
         def accept(self, visitor):
             return visitor.visit_mov_instruction(self)
-    
-    class HiddenListCreation:
-        def __init__(self, line, elements_buff):
-            self.line = line
-            self.elements_buff = elements_buff
-            
-        def __repr__(self):
-            return f"HiddenListCreation=({self.line}, {self.elements_buff})"
-
-        def accept(self, visitor):
-            return visitor.visit_Hidden_list_creation(self)
-        
-    class LoadInstruction:
-        def __init__(self, stander_pointer, stander_var, line):
-            self.line = line
-            self.stander_pointer = stander_pointer
-            self.stander_var = stander_var
-            
-        def __repr__(self):
-            return f"Load Instruction=({self.line}, {self.stander_pointer}, {self.stander_var})"
-
-        def accept(self, visitor):
-            return visitor.visit_Load_instruction(self)
-        
-    
-    class FunctionCallInstruction:
-        def __init__(self, function_call, pointer_linker, line):
-            self.line = line
-            self.function_call = function_call
-            self.pointer_linker = pointer_linker
-            
-        def __repr__(self):
-            return f"Call Instruction=({self.line}, {self.function_call}, {self.pointer_linker})"
-        
-        def accept(self, visitor):
-            return visitor.visit_System_function_call(self)
-        
-    
-    class ComputeCallInstruction:
-        def __init__(self, pointer_resolver, expression, line):
-            self.pointer_resolver = pointer_resolver
-            self.expression = expression
-            self.line = line
-        
-        def __repr__(self):
-            return f"Compute Instruction=({self.line}, {self.pointer_resolver}, {self.expression})"
-        
-        def accept(self, visitor):
-            return visitor.visit_Compute_instruction_call(self)
         
     
 class ParseError(Exception):
@@ -239,47 +180,27 @@ class Parser:
             return self.handle_mov_instruction()
         
         elif self.match(TokenType.LOAD):
-            return self.handle_load_instruction()
+            # return self.handle_load_instruction()
+            pass
         
         elif self.match(TokenType.CALL):
-            return self.handle_function_call()
+            # return self.handle_function_call()
+            pass
         
         elif self.match(TokenType.COMPUTE):
-            return self.handle_compute_instruction()
+            # return self.handle_compute_instruction()
+            pass
         
         return self.expression()
 
 
-    def handle_compute_instruction(self):
-        line = self.peek().line
-        pointer_resolver = self.consume(TokenType.IDENTIFIER, "Expected a 'Pointer Resolver Variable'")
-        self.consume(TokenType.COMMA, "Expected ',' after pointer-resolver")
-        self.consume(TokenType.LEFT_BRACKET, "Expected '[' while writing computation expression")
-        expression = self.expression()
-        self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while writing computation expression")
-        return Expr.ComputeCallInstruction(pointer_resolver, expression, line)
-        
-
-    def handle_function_call(self):
-        line = self.peek().line
-        function_call = self.consume(TokenType.IDENTIFIER, "Expected a 'System Function Call Name'")
-        self.consume(TokenType.COMMA, "Expected ',' after function call")
-        pointer_linker = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as list type")
-        return Expr.FunctionCallInstruction(function_call, pointer_linker, line)
-
-    def handle_load_instruction(self):
-        line = self.peek().line
-        stander_pointer = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer linker")
-        self.consume(TokenType.COMMA, "Expected ',' after identifier")
-        stander_var = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer linker")
-        return Expr.LoadInstruction(stander_pointer, stander_var, line)
-
     def handle_mov_instruction(self):
         line = self.peek().line
-        stander_var = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as instruction pointer")
-        self.consume(TokenType.COMMA, "Expected ',' after identifier")
-        value = self.expression()
-        return Expr.MovInstruction(stander_var, value, line)
+        opponent_x = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after mov x [mov x, y]")
+        opponent_y = self.expression()
+        return Expr.MovInstruction(opponent_x, opponent_y, line)
+    
     
     def expression(self):
         return self.or_expr()
@@ -361,23 +282,7 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
         
-        if self.match(TokenType.HANT_OPERATOR):
-            line = self.peek().line
-            expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
-            return Expr.Identifier(expr, line)
         
-        if self.match(TokenType.LEFT_BRACKET):
-            line = self.peek().line
-            elements_buff = []
-            while True:
-                element = self.expression()
-                elements_buff.append(element)
-                if not self.check(TokenType.COMMA):
-                    break
-                self.consume(TokenType.COMMA, "Expected ',' while resolving hidden list element")
-                
-            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' while making hidden list subset")
-            return Expr.HiddenListCreation(line, elements_buff)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

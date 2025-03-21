@@ -98,175 +98,33 @@ class InstructionError(Exception):
 class Interpreter(ExprVisitor):
     def __init__(self):
         self.environment = Environment()
-        self.pointer_environment = PointerStructure()
         self.stdvar = StanderVariable()
-        self.addr_environment = AddressResolverStructure()
         self.StanderLib = StanderLibrary()
         
-    
-    def visit_Compute_instruction_call(self, inst):
-        line = inst.line
-        pointer_resolver = inst.pointer_resolver.lexeme
-        expression = inst.expression
+    def visit_move_instruction(self, inst):
         
-        if pointer_resolver == self.stdvar.vptr:
-            result = self.evaluate(expression)
-            self.define_in_pointer_environment(pointer_resolver, result)
+        opponent_x = inst.opponent_x.lexeme
+        opponent_y = self.evaluate(inst.opponent_y)
+        self.push_in_environment(opponent_x, opponent_y)
+        return (opponent_x, opponent_y)
+        
+    
+    def push_in_environment(self, x, y, is_const=False):
+        
+        if self.environment.is_defined(x):
+            self.environment.assign(x, y)
         else:
-            raise InstructionError(f"{pointer_resolver} is a looking like 'vptr', which is very suitable. \n\tOn Line=[{line}]")
-    
-    
-    def visit_System_function_call(self, inst):
-        line = inst.line
-        function_call_name = inst.function_call.lexeme
-        pointer_linker = inst.pointer_linker.lexeme
-        
-        actual_args = []
-        
-        if self.pointer_environment.is_defined(pointer_linker) and pointer_linker == self.stdvar.fptr:
-            actual_args = self.pointer_environment.get(pointer_linker)
-            if self.is_list(actual_args):
-                if self.StanderLib.check_right_system_function(function_call_name):
-                    self.StanderLib.call_impropriated_function(function_call_name, actual_args)
-                else:
-                    # User Function Call Implemented here, leter
-                    raise InstructionError(f"{function_call_name} is Not a stander Library Method. \n\tOn Line=[{line}]")
-            else:
-                raise InstructionError(f"Stander-Pointer resolver is not containing a list. \n\tOn Line=[{line}]")
-        
-        else:
-            raise InstructionError(f"Stander-Pointer resolver fptr never used in this environment-block, before calling function. \n\tOn Line=[{line}]")
-    
-    def visit_Load_instruction(self, inst):
-        line = inst.line
-        stander_pointer = inst.stander_pointer.lexeme
-        stander_variable = inst.stander_var.lexeme
-        
-        elements = []
-        temp = []
-        if stander_pointer == self.stdvar.fptr:
-                
-            if self.is_stander_pointer(stander_variable):
-                temp = self.addr_environment.get(stander_variable)
-                
-            elif (stander_variable == self.stdvar.rdo_var):
-                temp = self.environment.get(stander_variable)
-                
-            else:
-                raise InstructionError(f"Use Runtime-Read-Only Variable (rdo_var) or (Pointer-Resolver-Variable) at the place of '{stander_variable}'. \t\tOn Line=[{line}]")
-                    
-            if isinstance(temp, list):
-                for item in temp:
-                    elements.append(item[0])
-                self.define_in_pointer_environment(stander_pointer, elements)
-                
-            else:
-                raise InstructionError(f"Looking Like {temp[0]} is not an list, why?. \n\tOn Line=[{line}]")        
-    
-    
-    def visit_Hidden_list_creation(self, inst):
-        line = inst.line
-        buffer = inst.elements_buff
-        
-        try:
-            elements = []
-            for item in range(len(buffer)):
-                elements.append(self.evaluate(buffer[item]))
+            self.environment.define(x, y, is_const)
             
-            self.define_in_rdo_var(elements, False)
-            return elements
-        
-        except Exception as err:
-            raise InstructionError(f"an error occurred \n\tOn Line=[{line}]")
-        
-    
-    def visit_mov_instruction(self, inst):
-        stander_variable = inst.stander_var.lexeme
-        value = self.evaluate(inst.value)
-        line = inst.line
-        
-        if self.is_stander_variable(stander_variable):
-            self.define_in_environment(stander_variable, value, False)
-            
-        elif self.is_stander_pointer(stander_variable):
-            self.define_in_addr_environment(stander_variable, value, False)
-        
-        elif self.is_special_pointer(stander_variable):
-             self.define_in_pointer_environment(stander_variable, value)
-        else:
-            raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
-        
-    
-    def define_in_pointer_environment(self, stander_pointer, elements):
-        if self.pointer_environment.is_defined(stander_pointer):
-            self.pointer_environment.assign(stander_pointer, elements)
-        else:
-            self.pointer_environment.define(stander_pointer, elements, False)
-        
-        if self.environment.is_defined(self.stdvar.rdo_var):
-            self.environment.assign(self.stdvar.rdo_var, elements)
-        else:
-            self.environment.define(self.stdvar.rdo_var, elements, False)    
-        
-    
-    def is_special_pointer(self, stander_pointer):
-        if (stander_pointer == self.stdvar.vptr) or (stander_pointer == self.stdvar.cptr):
-            return True
-        else:
-            return False   
-    
-
-    def define_in_rdo_var(self, value, is_constant):
-        
-        if self.environment.is_defined(self.stdvar.rdo_var):
-            self.environment.assign(self.stdvar.rdo_var, value)
-        else:
-            self.environment.define(self.stdvar.rdo_var, value, is_constant)
-                
-    def define_in_addr_environment(self, stander_variable, value, is_constant):
-        if self.addr_environment.is_defined(stander_variable):
-            self.addr_environment.assign(stander_variable, value)
-        else:
-            self.addr_environment.define(stander_variable, value, is_constant)
-            
-        if self.environment.is_defined(self.stdvar.rdo_var):
-            self.environment.assign(self.stdvar.rdo_var, value)
-        else:
-            self.environment.define(self.stdvar.rdo_var, value, is_constant)
-            
-       
-    def define_in_environment(self, stander_variable, value, is_constant):
-        if self.environment.is_defined(stander_variable):
-            self.environment.assign(stander_variable, value)
-        else:
-            self.environment.define(stander_variable, value, is_constant)
-            
-        if self.environment.is_defined(self.stdvar.rdo_var):
-            self.environment.assign(self.stdvar.rdo_var, value)
-        else:
-            self.environment.define(self.stdvar.rdo_var, value, is_constant)
-            
-            
-    def is_stander_pointer(self, stander_variable):
-        if (stander_variable == self.stdvar.ecx_res) or (stander_variable == self.stdvar.edx_res) or (stander_variable == self.stdvar.eex_res) or (stander_variable == self.stdvar.efx_res) or (stander_variable == self.stdvar.egx_res) or (stander_variable == self.stdvar.ehx_res) or (stander_variable == self.stdvar.eix_res):
-            return True
-        else:
-            return False
-        
-    def is_stander_variable(self, stander_variable):
-        if (stander_variable == self.stdvar.ras) or (stander_variable == self.stdvar.rbs) or (stander_variable == self.stdvar.rcs) or (stander_variable == self.stdvar.rds) or (stander_variable == self.stdvar.res) or (stander_variable == self.stdvar.rfs) or (stander_variable == self.stdvar.rgs):
-            return True
-        else:
-            return False
         
     def is_list(self, item):
+        
         if isinstance(item, list):
             return True
         else:
             return False
         
-        
-    def visit_identifier(self, inst):
+    def calculate_identifier(self, inst):
         identifier = inst.identifier.lexeme
         line = inst.line
         if self.environment.is_defined(identifier):

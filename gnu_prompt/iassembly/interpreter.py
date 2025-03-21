@@ -115,20 +115,23 @@ class Interpreter(ExprVisitor):
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
             
-            #if self.is_opponent_y_regis(opponent_y, line):
-            #self.push_in_environment(opponent_x, opponent_y)
-            return (opponent_x, opponent_y)
+            if self.is_opponent_y_regis(opponent_y, line):
+                self.push_in_environment(opponent_x, opponent_y)
+                return (opponent_x, opponent_y)
             
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     def is_opponent_y_regis(self, y, line):
         
-        if self.environment.is_defined(y):
-            value = self.environment.get(y)
-            return value
+        if (y[0] == "register" or y[0] == "identifier"):
+            if self.environment.is_defined(y):
+                value = self.environment.get(y)
+                return value
+            else:
+                raise InstructionError(f"using of {y} without initialing it, before.")
         else:
-            pass
+            return self.evaluate(y)
             
     
     def push_in_environment(self, x, y, is_const=False):

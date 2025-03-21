@@ -1,7 +1,0 @@
-section .text ||
-
-	compute vptr, [(3 + 2) * 5]
-	mov edx_res, [#vptr]
-	load fptr, edx_res
-	call write, fptr
-||

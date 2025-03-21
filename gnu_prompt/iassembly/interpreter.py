@@ -131,7 +131,7 @@ class Interpreter(ExprVisitor):
             else:
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
-            return self.evaluate(y)
+            return y
             
     
     def push_in_environment(self, x, y, is_const=False):

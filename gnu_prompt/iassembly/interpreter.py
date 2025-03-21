@@ -1,6 +1,7 @@
 from iassembly.parser import *
 from iassembly.buffer import *
 from iassembly.stdvar import StanderVariable
+from iassembly.stdlib import *
 
 class ExprVisitor:
         
@@ -63,6 +64,10 @@ class ExprVisitor:
     def accept(self, visitor):
         raise NotImplementedError("Subclasses must implement accept method")
 
+    def visit_System_function_call(self, inst):
+        raise NotImplementedError("visit_System_function_call must implement as a method")
+
+
 class NotImplementedError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -93,7 +98,28 @@ class Interpreter(ExprVisitor):
         self.pointer_environment = PointerStructure()
         self.stdvar = StanderVariable()
         self.addr_environment = AddressResolverStructure()
+        self.StanderLib = StanderLibrary()
     
+    def visit_System_function_call(self, inst):
+        line = inst.line
+        function_call_name = inst.function_call.lexeme
+        pointer_resolver = inst.pointer_resolver.lexeme
+        
+        actual_args = []
+        
+        if self.pointer_environment.is_defined(pointer_resolver) and pointer_resolver == self.stdvar.fptr:
+            actual_args = self.pointer_environment.get(pointer_resolver)
+            if self.is_list(actual_args):
+                if self.StanderLib.check_right_system_function(function_call_name):
+                    self.StanderLib.call_impropriated_function(function_call_name, actual_args)
+                else:
+                    # User Function Call Implemented here, leter
+                    raise InstructionError(f"{function_call_name} is Not a stander Library Method. \n\tOn Line=[{line}]")
+            else:
+                raise InstructionError(f"Stander-Pointer resolver is not containing a list. \n\tOn Line=[{line}]")
+        
+        else:
+            raise InstructionError(f"Stander-Pointer resolver fptr never used in this environment-block, before calling function. \n\tOn Line=[{line}]")
     
     def visit_Load_instruction(self, inst):
         line = inst.line
@@ -292,10 +318,10 @@ class Interpreter(ExprVisitor):
             _eval_ = left != right
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '==':
-            _eval_ = left == right
+            _eval_ = str(left) == str(right)
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '===':
-            _eval_ = type(left).__name__ == type(right).__name__
+            _eval_ = ((type(left).__name__ == type(right).__name__) and (left == right))
             return (bool(_eval_), "bool", id(_eval_))
         else:
             raise ValueError(f"Unsupported binary operator: {expr.operator}")

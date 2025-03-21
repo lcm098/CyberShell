@@ -174,6 +174,19 @@ class Expr:
 
         def accept(self, visitor):
             return visitor.visit_Load_instruction(self)
+        
+    
+    class FunctionCallInstruction:
+        def __init__(self, function_call, pointer_resolver, line):
+            self.line = line
+            self.function_call = function_call
+            self.pointer_resolver = pointer_resolver
+            
+        def __repr__(self):
+            return f"Call Instruction=({self.line}, {self.function_call}, {self.pointer_resolver})"
+        
+        def accept(self, visitor):
+            return visitor.visit_System_function_call(self)
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -214,7 +227,18 @@ class Parser:
         elif self.match(TokenType.LOAD):
             return self.handle_load_instruction()
         
+        elif self.match(TokenType.CALL):
+            return self.handle_function_call()
+        
         return self.expression()
+
+
+    def handle_function_call(self):
+        line = self.peek().line
+        function_call = self.consume(TokenType.IDENTIFIER, "Expected a 'System Function Call Name'")
+        self.consume(TokenType.COMMA, "Expected ',' after function call")
+        pointer_resolver = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER' as list type")
+        return Expr.FunctionCallInstruction(function_call, pointer_resolver, line)
 
     def handle_load_instruction(self):
         line = self.peek().line
@@ -315,9 +339,8 @@ class Parser:
             expr = self.consume(TokenType.IDENTIFIER, "Expected 'IDENTIFIER'")
             return Expr.Identifier(expr, line)
         
-        if self.match(TokenType.AT_THE_RATE):
+        if self.match(TokenType.LEFT_BRACKET):
             line = self.peek().line
-            self.consume(TokenType.LEFT_BRACKET, "Expected '[' while making hidden list subset")
             elements_buff = []
             while True:
                 element = self.expression()

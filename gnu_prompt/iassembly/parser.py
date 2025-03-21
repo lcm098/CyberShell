@@ -162,6 +162,95 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_identifier(self)
         
+    class CallPointerList:
+        def __init__(self, pointer):
+            self.pointer = pointer
+        
+        def __repr__(self):
+            return f"fptr=({self.pointer})"
+        
+        def accept(self, visitor):
+            return visitor.visit_call_pointer_list(self)
+    
+    class ValuePointerList:
+        def __init__(self, pointer):
+            self.pointer = pointer
+        
+        def __repr__(self):
+            return f"vptr=({self.pointer})"
+        
+        def accept(self, visitor):
+            return visitor.visit_value_pointer_list(self)
+    
+    class ComparePointerList:
+        def __init__(self, pointer):
+            self.pointer = pointer
+        
+        def __repr__(self):
+            return f"cptr=({self.pointer})"
+        
+        def accept(self, visitor):
+            return visitor.visit_compare_pointer_list(self)
+    
+    class MakeHiddenList:
+        def __init__(self, elements, line):
+            self.elements = elements
+            self.line = line
+        
+        def __repr__(self):
+            return f"HiddenList=({self.elements}, {self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_make_hidden_list(self)
+    
+    class LoadInstruction:
+        def __init__(self, opponent_x, opponent_y, line):
+            self.opponent_x = opponent_x
+            self.opponent_y = opponent_y
+            self.line = line
+        
+        def __repr__(self):
+            return f"load instruction=({self.opponent_x}, {self.opponent_x}, {self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_load_instruction(self)
+    
+    class CallInstruction:
+        def __init__(self, opponent_x, opponent_y, line):
+            self.opponent_x = opponent_x
+            self.opponent_y = opponent_y
+            self.line = line
+        
+        def __repr__(self):
+            return f"call instruction=({self.opponent_x}, {self.opponent_x}, {self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_call_instruction(self)
+    
+    class ComputeInstruction:
+        def __init__(self, opponent_x, opponent_y, line):
+            self.opponent_x = opponent_x
+            self.opponent_y = opponent_y
+            self.line = line
+        
+        def __repr__(self):
+            return f"compute instruction=({self.opponent_x}, {self.opponent_x}, {self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_compute_instruction(self)
+    
+    class LinkInstruction:
+        def __init__(self, opponent_x, opponent_y, line):
+            self.opponent_x = opponent_x
+            self.opponent_y = opponent_y
+            self.line = line
+        
+        def __repr__(self):
+            return f"link instruction=({self.opponent_x}, {self.opponent_x}, {self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_link_instruction(self)
+    
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -200,19 +289,49 @@ class Parser:
             return self.handle_mov_instruction()
         
         elif self.match(TokenType.LOAD):
-            # return self.handle_load_instruction()
-            pass
+            return self.handle_load_instruction()
         
         elif self.match(TokenType.CALL):
-            # return self.handle_function_call()
-            pass
+            return self.handle_function_call()
         
         elif self.match(TokenType.COMPUTE):
-            # return self.handle_compute_instruction()
-            pass
+            return self.handle_compute_instruction()
+        
+        elif self.match(TokenType.LINK):
+            return self.handle_Link_instruction()
         
         return self.expression()
 
+    def handle_Link_instruction(self):
+        line = self.peek().line
+        opponent_x = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after compute x [compute x, y]")
+        opponent_y = self.expression()
+        return Expr.LinkInstruction(opponent_x, opponent_y, line)
+
+    def handle_compute_instruction(self):
+        line = self.peek().line
+        opponent_x = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after compute x [compute x, y]")
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' after compute x [compute x, [y + z]]")
+        opponent_y = self.expression()
+        self.consume(TokenType.RIGHT_BRACKET, "Expected '[' after compute x [compute x, [y + z]]")
+        return Expr.ComputeInstruction(opponent_x, opponent_y, line)
+
+
+    def handle_function_call(self):
+        line = self.peek().line
+        opponent_x = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after call x [call x, y]")
+        opponent_y = self.expression()
+        return Expr.CallInstruction(opponent_x, opponent_y, line)
+
+    def handle_load_instruction(self):
+        line = self.peek().line
+        opponent_x = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after load x [load x, y]")
+        opponent_y = self.expression()
+        return Expr.LoadInstruction(opponent_x, opponent_y, line)
 
     def handle_mov_instruction(self):
         line = self.peek().line
@@ -281,7 +400,14 @@ class Parser:
         return self.primary()
 
     def primary(self):
-    
+        
+        if self.match(TokenType.FPTR):
+            return Expr.CallPointerList("fptr")
+        if self.match(TokenType.VPTR):
+            return Expr.ValuePointerList("vptr")
+        if self.match(TokenType.CPTR):
+            return Expr.ComparePointerList("cptr")
+        
         if self.match(TokenType.EAX):
             return Expr.Register("eax")
         if self.match(TokenType.EBX):
@@ -321,6 +447,17 @@ class Parser:
             self.past(distance=1)
             ident = self.consume(TokenType.IDENTIFIER, "Expected an Identifier")
             return Expr.Identifier(ident)
+        
+        if self.match(TokenType.LEFT_BRACKET):
+            line = self.peek().line
+            elements = []
+            while True:
+                item = self.expression()
+                elements.append(item)
+                if not self.match(TokenType.COMMA):
+                    break
+            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' closing list pair")
+            return Expr.MakeHiddenList(elements, line)
             
         error_token = self.peek()
         self.error(error_token, "Expect expression.", self.current)

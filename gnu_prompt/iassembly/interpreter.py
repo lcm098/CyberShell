@@ -107,6 +107,76 @@ class Interpreter(ExprVisitor):
         
     def visit_register(self, expr):
         return (expr.register, "register", id(expr.register))
+    
+    def visit_call_pointer_list(self, expr):
+        return (expr.pointer, "fptr", id(expr.pointer))
+    
+    def visit_value_pointer_list(self, expr):
+        return (expr.pointer, "vptr", id(expr.pointer))
+    
+    def visit_compare_pointer_list(self, expr):
+        return (expr.pointer, "cptr", id(expr.pointer))
+    
+    def visit_make_hidden_list(self, expr):
+        elements = expr.elements
+        line = expr.line
+        
+        clean_list = []
+        for item in elements:
+            value = self.is_opponent_y_regis(item, line)
+            clean_list.append(value)
+        
+        return clean_list
+    
+    def visit_load_instruction(self, inst):
+        line = inst.line
+        opponent_x = self.evaluate(inst.opponent_x)
+        opponent_y = self.evaluate(inst.opponent_y)
+        
+        if opponent_x[1] == "register":
+            self.push_in_environment(opponent_x, list(self.is_opponent_y_regis(opponent_y, line)))
+        else:
+            raise InstructionError(f"identifier {opponent_x} is not a 'register' type. \n\tOn Line=[{line}]")
+        
+    def visit_call_instruction(self, inst):
+        line = inst.line
+        opponent_x = self.evaluate(inst.opponent_x)
+        opponent_y = self.evaluate(inst.opponent_y)
+        
+        clean_list = []
+        for item in opponent_y:
+            value = self.is_opponent_y_regis(item, line)
+            clean_list.append(value[0])
+        
+        if opponent_x[1] == "identifier" and opponent_y[1] == "fptr" and isinstance(opponent_y, list):
+            if self.StanderLib.check_right_system_function(opponent_x):
+                self.StanderLib.call_impropriated_function(opponent_x, clean_list)
+            else:
+                raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
+        else:
+            raise InstructionError(f"miss use at function call of {opponent_x} and {opponent_y}. \n\tOn Line=[{line}]")
+    
+    def visit_compute_instruction(self, inst):
+        line = inst.line
+        opponent_x = self.evaluate(inst.opponent_x)
+        opponent_y = self.evaluate(inst.opponent_y)
+        
+        if opponent_x[1] == "vptr":
+            value = self.evaluate(opponent_y)
+            return value
+        else:
+            raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
+    
+    def visit_link_instruction(self, inst):
+        line = inst.line
+        opponent_x = self.evaluate(inst.opponent_x)
+        opponent_y = self.evaluate(inst.opponent_y)
+        
+        if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
+            self.push_in_environment(opponent_x, list(self.is_opponent_y_regis(opponent_y, line)))
+        else:
+            raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
+            
         
     def visit_mov_instruction(self, inst):
         
@@ -114,10 +184,8 @@ class Interpreter(ExprVisitor):
             line = inst.line
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
-            
-
+        
             self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
-            print(opponent_x, self.environment.get(opponent_x))
             
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")

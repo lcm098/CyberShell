@@ -127,7 +127,7 @@ class Interpreter(ExprVisitor):
         if (y[1] == "register" or y[1] == "identifier"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
-                return value
+                return self.evaluate(value)
             else:
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:

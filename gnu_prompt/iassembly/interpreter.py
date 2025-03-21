@@ -217,9 +217,9 @@ class Interpreter(ExprVisitor):
     def push_in_environment(self, x, y, is_const=False):
         
         if self.environment.is_defined(x):
-            self.environment.assign(x[0], y)
+            self.environment.assign(x, y)
         else:
-            self.environment.define(x[0], y, is_const)
+            self.environment.define(x, y, is_const)
             
         
     def is_list(self, item):

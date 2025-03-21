@@ -134,6 +134,7 @@ class Interpreter(ExprVisitor):
             else:
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
+            print(y, "catched")
             return y
             
     

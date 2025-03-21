@@ -11,7 +11,7 @@ class StanderVariable:
     rgs = "rgs"
 
     ecx_res = "ecx_res" # used to resolve value at address
-    edx_res = "edx_rex" # used to resolve value at address
+    edx_res = "edx_res" # used to resolve value at address
     eex_res = "eex_res" # used to resolve value at address
     efx_res = "efx_res" # used to resolve value at address
     egx_res = "egx_res" # used to resolve value at address

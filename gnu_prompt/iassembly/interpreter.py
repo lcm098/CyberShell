@@ -176,8 +176,6 @@ class Interpreter(ExprVisitor):
             self.define_in_addr_environment(stander_variable, value, False)
         
         else:
-            print(self.is_stander_pointer(stander_variable), stander_variable)
-            print(self.is_list(value), value)
             raise InstructionError(f"{stander_variable} is not a stander-instruction-variable. \n\tOn Line =[{line}]")
     
     def define_in_pointer_environment(self, stander_pointer, elements):

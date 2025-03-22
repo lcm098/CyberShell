@@ -167,7 +167,7 @@ class Interpreter(ExprVisitor):
         
         if opponent_x[1] == "vptr":
             value = self.evaluate(opponent_y)
-            return value
+            print(opponent_x, opponent_y)
         else:
             raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
     

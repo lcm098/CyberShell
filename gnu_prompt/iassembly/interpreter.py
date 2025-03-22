@@ -193,7 +193,7 @@ class Interpreter(ExprVisitor):
                 self.push_in_environment(opponent_x, opponent_y)
                 print(opponent_x, opponent_y)
             else:
-                raise InstructionError(f"Unable to store value {clean_list} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
+                raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
         else:
             raise InstructionError(f"opponent_y expected as (e)Type or (v)Type register but, i got {opponent_y}")
 

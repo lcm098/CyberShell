@@ -144,9 +144,8 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         clean_list = []
-        for item in opponent_y:
-            value = self.is_opponent_y_regis(item, line)
-            clean_list.append(value[0])
+        print(opponent_x, opponent_y)
+        sys._exit(0)
         
         if opponent_x[1] == "identifier" and opponent_y[1] == "fptr" and isinstance(opponent_y, list):
             if self.StanderLib.check_right_system_function(opponent_x):

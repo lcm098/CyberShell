@@ -120,7 +120,7 @@ class Interpreter(ExprVisitor):
     def visit_make_hidden_list(self, expr):
         elements = expr.elements
         line = expr.line
-        print(elements)
+        
         clean_list = []
         for item in elements:
             clean_list.append(self.is_opponent_y_regis(self.evaluate(item), line))
@@ -174,7 +174,7 @@ class Interpreter(ExprVisitor):
         line = inst.line
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
-        print(opponent_x, opponent_y) #////////////////////////
+        
         if opponent_y[1] in ("register"):
             clean_list = self.environment.get(opponent_y)
             
@@ -203,7 +203,7 @@ class Interpreter(ExprVisitor):
             line = inst.line
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
-            print(opponent_x, opponent_y)
+
             if isinstance(opponent_y, list):
                 self.push_in_environment(opponent_x, opponent_y)
             else:    
@@ -224,6 +224,7 @@ class Interpreter(ExprVisitor):
             else:
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
+            print(y)
             return y
             
     

@@ -213,15 +213,15 @@ class Interpreter(ExprVisitor):
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     def make_clean_list(self, lst):
-        
         clean = []
         i = 0
-        while lst[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
+        while i < len(lst) and lst[i][1] in ("register", "vptr", "cptr", "fptr", "identifier"):
             value = self.environment.get(lst[i])
             if value[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
                 clean.append(self.make_clean_list(value))
             else:
                 clean.append(value)
+            i += 1
         return clean
         
         

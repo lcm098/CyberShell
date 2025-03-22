@@ -1,0 +1,35 @@
+
+section .text ||
+	"""
+	mov eax, "Hello Anoop Kutta"
+	mov ebx, eax
+	mov ecx, [ebx]
+	link fptr, ecx
+	call write, fptr
+	
+	mov eax, "anoop sinha"
+	mov ebx, "is"
+	mov ecx, "a"
+	mov edx, "great"
+	mov eex, "man"
+	mov efx, " "
+	
+	mov eax, [eax, efx, ebx, efx, ecx, efx, edx, efx, eex]
+	link fptr, eax
+	call write, fptr
+	
+	mov exx, ["sale", "kutte", "jaan", "se", "Maar", "dunga", 47, "se", true, 22.22]
+	mov ezx, ["kya re bhghmanya, ab bole sale"]
+	link fptr, exx
+	call write, fptr
+	link fptr, ezx
+	call write,  fptr
+	"""
+	
+	compute vptr, [((2*5)*5)+((2*5)*5)]
+	link eax, vptr
+	mov ebx, [eax]
+	link fptr, ebx
+	call write, fptr
+	
+||

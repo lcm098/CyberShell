@@ -203,10 +203,8 @@ class Interpreter(ExprVisitor):
             if opponent_x[1] == "register" and isinstance(opponent_y, list):
                 clean_list = self.make_clean_list(opponent_y)
                 self.push_in_environment(opponent_x, clean_list)
-                print("DEBUG 1", opponent_x, clean_list)
                 
             elif opponent_x[1] == "register" and (not isinstance(opponent_y, list)):
-                print("DEBUG 2", opponent_x, opponent_y)
                 self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
             
         except Exception as err:

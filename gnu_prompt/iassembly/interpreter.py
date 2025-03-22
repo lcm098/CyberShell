@@ -125,7 +125,6 @@ class Interpreter(ExprVisitor):
         for item in elements:
             clean_list.append(self.is_opponent_y_regis(self.evaluate(item), line))
         
-        print("DEBUG: ", clean_list)
         return clean_list
     
     def visit_load_instruction(self, inst):
@@ -153,7 +152,7 @@ class Interpreter(ExprVisitor):
             
             if opponent_x[1] == "identifier" and isinstance(opponent_y, list):
                 if self.StanderLib.check_right_system_function(opponent_x[0]):
-                    self.StanderLib.call_impropriated_function(opponent_x, clean_list)
+                    self.StanderLib.call_impropriated_function(opponent_x[0], clean_list)
                 else:
                     raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
             else:
@@ -178,8 +177,7 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         clean_list = self.environment.get(opponent_y)
-        
-        print("DEBUG 2:", clean_list)
+    
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(clean_list, list):
             self.push_in_environment(opponent_x, opponent_y)
         else:
@@ -194,7 +192,6 @@ class Interpreter(ExprVisitor):
             opponent_y = self.evaluate(inst.opponent_y)
 
             if isinstance(opponent_y, list):
-                print("DEBUG 3:", opponent_y)
                 self.push_in_environment(opponent_x, opponent_y)
             else:    
                 self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))

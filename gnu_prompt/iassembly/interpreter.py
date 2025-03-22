@@ -178,7 +178,7 @@ class Interpreter(ExprVisitor):
         if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
             self.push_in_environment(opponent_x, opponent_y)
         else:
-            raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
+            raise InstructionError(f"Unable to store value {clean_list} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
             
         
     def visit_mov_instruction(self, inst):

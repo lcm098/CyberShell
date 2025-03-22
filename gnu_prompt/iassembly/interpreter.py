@@ -174,7 +174,7 @@ class Interpreter(ExprVisitor):
         line = inst.line
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
-        
+        print(opponent_x, opponent_y)
         if opponent_y[1] in ("register"):
             clean_list = self.environment.get(opponent_y)
             

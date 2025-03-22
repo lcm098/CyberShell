@@ -189,7 +189,8 @@ class Interpreter(ExprVisitor):
             
             while not isinstance(opponent_y, list):
                 opponent_y = self.environment.get(opponent_y)
-                print(opponent_y)
+            print(opponent_y)
+                
             if opponent_x[1] in ("register") and isinstance(opponent_y, list):
                 self.push_in_environment(opponent_x, opponent_y)
             else:

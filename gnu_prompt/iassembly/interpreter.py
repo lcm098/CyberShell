@@ -200,19 +200,30 @@ class Interpreter(ExprVisitor):
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
 
-            if isinstance(opponent_y, list):
-                clean_list = []
-                for item in opponent_y:
-                    clean_list.append(self.is_opponent_y_regis(item, line))    
+            if opponent_x[1] == "register" and isinstance(opponent_y, list):
+                clean_list = self.make_clean_list(opponent_y)
                 self.push_in_environment(opponent_x, clean_list)
                 print("DEBUG 1", opponent_x, clean_list)
                 
-            else:
+            elif opponent_x[1] == "register" and (not isinstance(opponent_y, list)):
                 print("DEBUG 2", opponent_x, opponent_y)
                 self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
             
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
+        
+    def make_clean_list(self, lst):
+        
+        clean = []
+        i = 0
+        while lst[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
+            value = self.environment.get(lst[i])
+            if value[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
+                clean.append(self.make_clean_list(value))
+            else:
+                clean.append(value)
+        return clean
+        
         
     def is_opponent_y_regis(self, y, line):
         

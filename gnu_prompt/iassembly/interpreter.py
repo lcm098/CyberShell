@@ -175,7 +175,7 @@ class Interpreter(ExprVisitor):
         clean_list = self.environment.get(opponent_y)
         
         print("DEBUG 2:", clean_list)
-        if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(opponent_y, list):
+        if opponent_x[1] in ("vptr", "fptr", "cptr") and isinstance(clean_list, list):
             self.push_in_environment(opponent_x, opponent_y)
         else:
             raise InstructionError(f"Unable to store value {clean_list} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")

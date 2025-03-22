@@ -201,8 +201,10 @@ class Interpreter(ExprVisitor):
             opponent_y = self.evaluate(inst.opponent_y)
 
             if isinstance(opponent_y, list):
+                print("DEBUG 1", opponent_x, opponent_y)
                 self.push_in_environment(opponent_x, opponent_y)
-            else:    
+            else:
+                print("DEBUG 2", opponent_x, opponent_y)
                 self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
             
         except Exception as err:

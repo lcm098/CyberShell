@@ -143,20 +143,23 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        while not isinstance(opponent_y, list):
-            opponent_y = self.environment.get(opponent_y)
+        if opponent_y[1] == "fptr":
+            while not isinstance(opponent_y, list):
+                opponent_y = self.environment.get(opponent_y)
+
+            clean_list = []
+            for item in opponent_y:
+                clean_list.append(item[0])
             
-        print(opponent_x, opponent_y)
-        sys._exit(0)
-        
-        if opponent_x[1] == "identifier" and opponent_y[1] == "fptr" and isinstance(opponent_y, list):
-            if self.StanderLib.check_right_system_function(opponent_x[0]):
-                # self.StanderLib.call_impropriated_function(opponent_x, )
-                pass
+            if opponent_x[1] == "identifier" and isinstance(opponent_y, list):
+                if self.StanderLib.check_right_system_function(opponent_x[0]):
+                    self.StanderLib.call_impropriated_function(opponent_x, clean_list)
+                else:
+                    raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
             else:
-                raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
+                raise InstructionError(f"miss use at function call of {opponent_x} and {opponent_y}. \n\tOn Line=[{line}]")
         else:
-            raise InstructionError(f"miss use at function call of {opponent_x} and {opponent_y}. \n\tOn Line=[{line}]")
+            raise InstructionError(f"opponent_y -> {opponent_y} is not a v(ptr)Type. \n\tOn Line={line}")
     
     def visit_compute_instruction(self, inst):
         line = inst.line

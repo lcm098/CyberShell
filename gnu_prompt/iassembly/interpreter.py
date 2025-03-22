@@ -145,7 +145,7 @@ class Interpreter(ExprVisitor):
         if opponent_y[1] == "fptr":
             while not isinstance(opponent_y, list):
                 opponent_y = self.environment.get(opponent_y)
-
+            
             clean_list = []
             for item in opponent_y:
                 clean_list.append(item[0])
@@ -178,6 +178,7 @@ class Interpreter(ExprVisitor):
         if opponent_y[1] in ("register"):
             
             if opponent_x[1] in ("vptr", "fptr", "cptr"):
+                
                 self.push_in_environment(opponent_x, opponent_y)
             else:
                 raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
@@ -220,6 +221,13 @@ class Interpreter(ExprVisitor):
             else:
                 clean.append(value)
             i += 1
+            
+        i = 0
+        while i < len(lst) and lst[i][1] in ("float", "int", "bool", "str", "char", "nil"):
+            value  = lst[i]
+            clean.append(value)
+            i += 1
+            
         return clean
         
         

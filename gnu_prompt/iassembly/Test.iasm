@@ -1,6 +1,6 @@
 
 section .text ||
-	"""
+	
 	mov eax, "Hello Anoop Kutta"
 	mov ebx, eax
 	mov ecx, [ebx]
@@ -24,7 +24,7 @@ section .text ||
 	call write, fptr
 	link fptr, ezx
 	call write,  fptr
-	"""
+	
 	
 	compute vptr, [((2*5)*5)+((2*5)*5)]
 	link eax, vptr

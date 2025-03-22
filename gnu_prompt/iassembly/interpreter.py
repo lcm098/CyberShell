@@ -178,15 +178,15 @@ class Interpreter(ExprVisitor):
         if opponent_y[1] in ("register"):
             
             if opponent_x[1] in ("vptr", "fptr", "cptr"):
-                
-                self.push_in_environment(opponent_x, opponent_y)
+                y_value = self.environment.get(opponent_y)
+                self.push_in_environment(opponent_x, y_value)
             else:
                 raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
         
         elif opponent_y[1] in ("vptr", "fptr", "cptr"):
-                
             if opponent_x[1] in ("register"):
-                self.push_in_environment(opponent_x, opponent_y)
+                y_value = self.environment.get(opponent_y)
+                self.push_in_environment(opponent_x, y_value)
             else:
                 raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
         else:
@@ -200,7 +200,7 @@ class Interpreter(ExprVisitor):
             line = inst.line
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
-
+            
             if opponent_x[1] == "register" and isinstance(opponent_y, list):
                 clean_list = self.make_clean_list(opponent_y)
                 self.push_in_environment(opponent_x, clean_list)
@@ -213,21 +213,15 @@ class Interpreter(ExprVisitor):
         
     def make_clean_list(self, lst):
         clean = []
-        i = 0
-        while i < len(lst) and lst[i][1] in ("register", "vptr", "cptr", "fptr", "identifier"):
-            value = self.environment.get(lst[i])
-            if value[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
-                clean.append(self.make_clean_list(value))
+        for item in lst:
+            if item[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
+                value = self.environment.get(item)
+                if isinstance(value, list):
+                    clean.append(self.make_clean_list(value))
+                else:
+                    clean.append(value)
             else:
-                clean.append(value)
-            i += 1
-            
-        i = 0
-        while i < len(lst) and lst[i][1] in ("float", "int", "bool", "str", "char", "nil"):
-            value  = lst[i]
-            clean.append(value)
-            i += 1
-            
+                clean.append(item)
         return clean
         
         
@@ -287,13 +281,21 @@ class Interpreter(ExprVisitor):
         return stmt.accept(self)
     
     def visit_bool_expr(self, expr):
-        return (bool(expr.value), "bool", id(expr.value))
+    
+        if expr.value.capitalize() == "True":
+            boolean_value = True
+        elif expr.value.capitalize() == "False":
+            boolean_value = False
+        else:
+            raise ValueError(f"Invalid boolean value: {expr.value}")
+        return (boolean_value, "bool", id(boolean_value))
+    
     
     def visit_char_expr(self, expr):
         return (expr.value, "char", id(expr.value))
     
-    def visit_nil_expr(self, expr):
-        return (None, "nil", None)
+    def visit_none_expr(self, expr):
+        return (None, "None", None)
     
     def visit_int_expr(self, expr):
         return (int(expr.value), "int", id(expr.value))
@@ -333,7 +335,8 @@ class Interpreter(ExprVisitor):
             _eval_ = left != right
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '==':
-            _eval_ = str(left) == str(right)
+            
+            _eval_ = left == right
             return (bool(_eval_), "bool", id(_eval_))
         elif expr.operator.lexeme == '===':
             _eval_ = ((type(left).__name__ == type(right).__name__) and (left == right))
@@ -344,11 +347,13 @@ class Interpreter(ExprVisitor):
     def visit_logical_expr(self, expr):
         left = self.evaluate(expr.left)[0]
         right = self.evaluate(expr.right)[0]
-
-        if expr.operator.lexeme == '&&':
-            return left and right
-        elif expr.operator.lexeme == '||':
-            return left or right
+        
+        if expr.operator.lexeme == '&':
+            _eval_ = bool(left and right)
+            return (_eval_, "bool", id(_eval_))
+        elif expr.operator.lexeme == '|':
+            _eval_ = bool(left or right)
+            return (_eval_, "bool", id(_eval_))
         else:
             raise ValueError(f"Unsupported logical operator: {expr.operator}")
 
@@ -356,7 +361,20 @@ class Interpreter(ExprVisitor):
         right = self.evaluate(expr.right)[0]
 
         if expr.operator.lexeme == '!':
-            return not right
+            _eval_ = bool(not right)
+            return (_eval_, "bool", id(_eval_))
+        elif expr.operator.lexeme == "-":
+            _eval_ = float(-right)
+            return (_eval_, "float", id(_eval_))
+        elif expr.operator.lexeme == "+":
+            _eval_ = float(+right)
+            return (_eval_, "float", id(_eval_))
+        elif expr.operator.lexeme == "++":
+            _eval_ = float(right+1)
+            return (_eval_, "float", id(_eval_))
+        elif expr.operator.lexeme == "--":
+            _eval_ = (right-1)
+            return (_eval_, "float", id(_eval_))
         else:
             raise ValueError(f"Unsupported unary operator: {expr.operator}")
 

@@ -62,7 +62,7 @@ GREATER_EQUAL = "GREATER_EQUAL"
 LESS_EQUAL = "LESS_EQUAL"
 TRUE = "TRUE"
 FALSE = "FALSE"
-NIL = "NIL"
+NONE = "NONE"
 PUSHA = "PUSHA"
 POPA = "POPA"
 CLSV = "CLSV" # clear variable
@@ -100,6 +100,8 @@ CPTR = "CPTR"
 DD = "DD"
 DL = "DL"
 DR = "DR"
+INCREMENT = "INCREMENT"
+DECREMENT = "DECREMENT"
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -108,10 +110,10 @@ TOKEN_TYPES = [
     RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET, SECTION, GLOBAL, EXTERN, PUBLIC,
     TEXT, DATA, BSS, DOUBLE_OR, READ, RETURN, EXEC, FIPTR, INC, DEC, LOOP,
     ADDRESS_OF_OPERATOR, CONDITIONAL_AND, BANG, CONDITIONAL_OR, BANG_EQUAL, EQUAL_EQUAL,
-    DATA_EQUAL, TRUE, FALSE, NIL, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
+    DATA_EQUAL, TRUE, FALSE, NONE, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
     INVOKE, SET, GET, INJECT, HANT_OPERATOR, POW, SQRT, CEIL, FLOOR,
     PLUS, MINUS, SLASH, STAR, MODULUS, AT_THE_RATE, COMPUTE, EAX, EBX, ECX, EDX, EFX,
-    EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR
+    EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT
 ]
 
 keywords = {
@@ -146,9 +148,9 @@ keywords = {
     "sqrt" : SQRT,
     "ceil" : CEIL,
     "floor" : FLOOR,
-    "true" : TRUE,
-    "false" : FALSE,
-    "nil" : NIL,
+    "True" : TRUE,
+    "False" : FALSE,
+    "None" : NONE,
     "loop" : LOOP,
     "add" : ADD,
     "sub" : SUB,
@@ -361,8 +363,12 @@ class Lexer:
         elif c == ':':
             self.add_token(COLON)
         elif c == '+':
+            if self.match(TokenType.PLUS):
+                self.add_token(INCREMENT)
             self.add_token(PLUS)
         elif c == '-':
+            if self.match(TokenType.MINUS):
+                self.add_token(DECREMENT)
             self.add_token(MINUS)
         elif c == '*':
             self.add_token(STAR)
@@ -482,7 +488,7 @@ class TokenType:
     LESS_EQUAL = "LESS_EQUAL"
     TRUE = "TRUE"
     FALSE = "FALSE"
-    NIL = "NIL"
+    NONE = "NONE"
     PUSHA = "PUSHA"
     POPA = "POPA"
     CLSV = "CLSV" # clear variable
@@ -493,6 +499,7 @@ class TokenType:
     EOF = "EOF"  # Added missing EOF token type
     SET = "SET"
     INJECT = "INJECT"
+    INCREMENT = "INCREMENT"
     HANT_OPERATOR = "HANT_OPERATOR"
     PLUS = "PLUS"
     MINUS = "MINUS"
@@ -501,7 +508,7 @@ class TokenType:
     MODULUS = "MODULUS"
     AT_THE_RATE = "AT_THE_RATE"
     COMPUTE = "COMPUTE"
-    
+    DECREMENT = "DECREMENT"
     EAX = "EAX"
     EBX = "EBX"
     ECX = "ECX"

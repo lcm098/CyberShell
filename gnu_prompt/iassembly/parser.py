@@ -76,7 +76,7 @@ class Expr:
         def accept(self, visitor):
             return visitor.visit_bool_expr(self)
 
-    class NIL:
+    class NONE:
         def __init__(self, value):
             self.value = value
         
@@ -84,7 +84,7 @@ class Expr:
             return f"Literal(value={None})"
         
         def accept(self, visitor):
-            return visitor.visit_nil_expr(self)
+            return visitor.visit_none_expr(self)
         
     
     class CHAR:
@@ -393,7 +393,7 @@ class Parser:
         return expr
 
     def unary(self):
-        if self.match(TokenType.BANG, TokenType.MINUS):
+        if self.match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS, TokenType.INCREMENT, TokenType.DECREMENT):
             operator = self.previous()
             right = self.unary()
             return Expr.Unary(operator, right)
@@ -430,11 +430,11 @@ class Parser:
         if self.match(TokenType.FLOAT):
             return Expr.FLOAT(self.previous().literal)
         if self.match(TokenType.FALSE):
-            return Expr.BOOL('false')
+            return Expr.BOOL(self.previous().lexeme)
         if self.match(TokenType.TRUE):
-            return Expr.BOOL('true')
-        if self.match(TokenType.NIL):
-            return Expr.NIL('nil')
+            return Expr.BOOL(self.previous().lexeme)
+        if self.match(TokenType.NONE):
+            return Expr.NONE(self.previous().lexeme)
         if self.match(TokenType.STRING):
             return Expr.Literal(self.previous().literal)
         if self.match(TokenType.CHAR):

@@ -1,6 +1,7 @@
 
 section .text ||
 	
+    """
 	mov eax, "Hello Anoop Kutta"
 	mov ebx, eax
 	mov ecx, [ebx]
@@ -30,6 +31,44 @@ section .text ||
 	link eax, vptr
 	mov ebx, [eax]
 	link fptr, ebx
+	call write, fptr
+	
+	
+
+	cmp cptr, [(exx[1] == "kutte") && (exx[6] == 47)]
+	[
+		mov eax, true
+		mov ebx, [eax]
+		link fptr, ebx
+		call write, fptr
+	]
+	elif cptr, [true==true]
+	[
+		mov eax, "partial"
+		mov ebx, [eax]
+		link fptr, ebx
+		call write, fptr
+	]
+	else cptr
+	[
+		mov eax, false
+		mov ebx, [eax]
+		link fptr, ebx
+		call write, fptr
+	]
+	"""
+	
+	compute vptr, [(5+5)]
+	link eax, vptr
+	compute vptr, [4+4]
+	link ebx, vptr
+	compute vptr, [3*9]
+	link ecx, vptr
+    compute vptr, [(False & True) == True] // which is False
+    link efx, vptr
+	
+	mov edx, [eax, ebx, ecx, efx]
+	link fptr, edx
 	call write, fptr
 	
 ||

@@ -6,5 +6,5 @@ class Write:
         
     def write(self):
         for item in self.args:
-            print(item, end="")
+            print(item, end=" ")
         print(end="\n")

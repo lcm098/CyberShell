@@ -416,6 +416,8 @@ class Parser:
             return Expr.Register("ecx")
         if self.match(TokenType.EDX):
             return Expr.Register("edx")
+        if self.match(TokenType.EEX):
+            return Expr.Register("eex")
         if self.match(TokenType.EFX):
             return Expr.Register("efx")
         if self.match(TokenType.EXX):

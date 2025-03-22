@@ -144,11 +144,11 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         clean_list = []
-        print(opponent_x, opponent_y)
+        print(opponent_x, self.environment.get(opponent_y))
         sys._exit(0)
         
         if opponent_x[1] == "identifier" and opponent_y[1] == "fptr" and isinstance(opponent_y, list):
-            if self.StanderLib.check_right_system_function(opponent_x):
+            if self.StanderLib.check_right_system_function(opponent_x[0]):
                 self.StanderLib.call_impropriated_function(opponent_x, clean_list)
             else:
                 raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")

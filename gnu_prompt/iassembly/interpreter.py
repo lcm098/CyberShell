@@ -185,11 +185,13 @@ class Interpreter(ExprVisitor):
                 raise InstructionError(f"Unable to store value {clean_list} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
         
         elif opponent_y[1] in ("vptr", "fptr", "cptr"):
-            clean_list = self.environment.get(opponent_y)
-            print(opponent_x, opponent_y)
+            
+            while not isinstance(opponent_y, list):
+                opponent_y = self.environment.get(opponent_y)
+                
             if opponent_x[1] in ("register") and isinstance(clean_list, list):
                 self.push_in_environment(opponent_x, opponent_y)
-                
+                print(opponent_x, opponent_y)
             else:
                 raise InstructionError(f"Unable to store value {clean_list} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
         else:

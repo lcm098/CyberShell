@@ -14,9 +14,9 @@ class Read:
              
             temp = input()
             if self.environment.is_defined((item, item, id(item))):
-                self.environment.assign((item, item, id(item)), (temp, type(item).__name__, id(item)))
+                self.environment.assign((item, item, id(item)), (temp, type(temp).__name__, id(temp)))
             else:
-                self.environment.define((item, item, id(item)), (temp, type(item).__name__, id(item)), False)
+                self.environment.define((item, item, id(item)), (temp, type(temp).__name__, id(temp)), False)
             buff.append((item, type(item).__name__, id(item)))
             
         return buff

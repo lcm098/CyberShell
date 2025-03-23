@@ -8,6 +8,7 @@ from iassembly.lexer import Lexer
 from iassembly.parser import ParseError
 from iassembly.lexer import LexerError
 from iassembly.interpreter import ValueError, InstructionError
+from iassembly.buffer import Throw_Error
 
 # new instance of interpreter
 interpreter = Interpreter()
@@ -109,6 +110,8 @@ def process_command(buffer):
             print(f"NotImplementedError : [{err}]")
         except FileNotFoundError as err:
             print("Compile Error : Unable to Find Target File to compile")
+        except Throw_Error as  err:
+            print(f"Storage Environment Error : [{err}]")
         except Exception as err:
             print(f"unknown system halt Error, but system safe : {err}")
         

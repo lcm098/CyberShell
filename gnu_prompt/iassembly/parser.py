@@ -4,7 +4,8 @@ from iassembly.interpreter import *
 class Expr:
         
     class Binary:
-        def __init__(self, left, operator, right):
+        def __init__(self, line, left, operator, right):
+            self.line = line
             self.left = left
             self.operator = operator
             self.right = right
@@ -16,7 +17,8 @@ class Expr:
             return visitor.visit_binary_expr(self)
         
     class Logical:
-        def __init__(self, left, operator, right):
+        def __init__(self, line, left, operator, right):
+            self.line = line
             self.left = left      # Left-hand side expression
             self.operator = operator  # Operator (AND/OR)
             self.right = right    # Right-hand side expression
@@ -25,7 +27,8 @@ class Expr:
             return visitor.visit_logical_expr(self)
         
     class Unary:
-        def __init__(self, operator, right):
+        def __init__(self, line, operator, right):
+            self.line = line
             self.operator = operator
             self.right = right
         
@@ -396,7 +399,7 @@ class Parser:
         while self.match(TokenType.CONDITIONAL_OR):
             operator = self.previous()
             right = self.and_expr()
-            expr = Expr.Logical(expr, operator, right)
+            expr = Expr.Logical(self.peek().line, expr, operator, right)
         return expr
 
     def and_expr(self):
@@ -404,7 +407,7 @@ class Parser:
         while self.match(TokenType.CONDITIONAL_AND):
             operator = self.previous()
             right = self.equality()
-            expr = Expr.Logical(expr, operator, right)
+            expr = Expr.Logical(self.peek().line, expr, operator, right)
         return expr
 
     def equality(self):
@@ -412,7 +415,7 @@ class Parser:
         while self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL, TokenType.DATA_EQUAL):
             operator = self.previous()
             right = self.comparison()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Expr.Binary(self.peek().line, expr, operator, right)
         return expr
 
     def comparison(self):
@@ -420,7 +423,7 @@ class Parser:
         while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
             operator = self.previous()
             right = self.term()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Expr.Binary(self.peek().line, expr, operator, right)
         return expr
 
     def term(self):
@@ -428,7 +431,7 @@ class Parser:
         while self.match(TokenType.MINUS, TokenType.PLUS):
             operator = self.previous()
             right = self.factor()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Expr.Binary(self.peek().line, expr, operator, right)
         return expr
 
     def factor(self):
@@ -436,14 +439,14 @@ class Parser:
         while self.match(TokenType.SLASH, TokenType.STAR, TokenType.MODULUS):
             operator = self.previous()
             right = self.unary()
-            expr = Expr.Binary(expr, operator, right)
+            expr = Expr.Binary(self.peek().line, expr, operator, right)
         return expr
 
     def unary(self):
         if self.match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS, TokenType.INCREMENT, TokenType.DECREMENT):
             operator = self.previous()
             right = self.unary()
-            return Expr.Unary(operator, right)
+            return Expr.Unary(self.peek().line, operator, right)
         return self.primary()
 
     def primary(self):

@@ -168,7 +168,7 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         if opponent_x[1] in ("register") and opponent_y[1] in ("vptr", "cptr", "fptr", "rptr"):
-            y_value = self.environment.get(opponent_y)
+            y_value = self.is_opponent_y_regis(opponent_y, line)
             self.push_in_environment(opponent_x, y_value)
             
         else:
@@ -207,7 +207,8 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         if opponent_x[1] == "vptr":
-            self.push_in_environment(opponent_x, opponent_y)
+            y_value = self.is_opponent_y_regis(opponent_y, line)
+            self.push_in_environment(opponent_x, y_value)
         else:
             raise InstructionError(f"Unable to store value in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
     
@@ -216,19 +217,12 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_y[1] in ("register"):
-            if opponent_x[1] in ("vptr", "fptr", "cptr"):
-                y_value = self.environment.get(opponent_y)
+        if opponent_x[1] in ("vptr", "fptr", "cptr"):
+            if opponent_y[1] in ("register"):
+                y_value = self.is_opponent_y_regis(opponent_y, line)
                 self.push_in_environment(opponent_x, y_value)
             else:
                 raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'v(Register)Type'. \n\tOn Line=[{line}]")
-        
-        elif opponent_y[1] in ("vptr", "fptr", "cptr"):
-            if opponent_x[1] in ("register"):
-                y_value = self.environment.get(opponent_y)
-                self.push_in_environment(opponent_x, y_value)
-            else:
-                raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
         else:
             raise InstructionError(f"opponent_y expected as (e)Type or (v)Type register but, i got {opponent_y}")
             
@@ -315,7 +309,7 @@ class Interpreter(ExprVisitor):
         return clean
         
     def is_opponent_y_regis(self, y, line):
-        if y[1] in ("register", "identifier", "const", "persistent"):
+        if (isinstance(y, list) or isinstance(y, tuple)) and y[1] in ("register", "identifier", "const", "persistent", "vptr", "cptr", "rptr", "fptr"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
                 # Check if the value is a list or another register reference
@@ -402,8 +396,14 @@ class Interpreter(ExprVisitor):
         return (float(expr.value), "float", id(expr.value))
     
     def visit_binary_expr(self, expr):
-        left = self.evaluate(expr.left)[0]
-        right = self.evaluate(expr.right)[0]
+        
+        # Get the left and right operands
+        left_value = self.evaluate(expr.left)
+        right_value = self.evaluate(expr.right)
+        
+        # Resolve identifiers and registers to their actual values
+        left = self.is_opponent_y_regis(left_value, expr.line)[0]
+        right = self.is_opponent_y_regis(right_value, expr.line)[0]
 
         if expr.operator.lexeme == '+':
             _eval_ = left + right
@@ -429,6 +429,11 @@ class Interpreter(ExprVisitor):
         elif expr.operator.lexeme == '<':
             _eval_ = left < right
             return (bool(_eval_), "bool", id(_eval_))
+        
+        elif expr.operator.lexeme == '<=':
+            _eval_ = left <= right
+            return (bool(_eval_), "bool", id(_eval_))
+        
         elif expr.operator.lexeme == "!=":
             _eval_ = left != right
             return (bool(_eval_), "bool", id(_eval_))
@@ -443,8 +448,14 @@ class Interpreter(ExprVisitor):
             raise ValueError(f"Unsupported binary operator: {expr.operator}")
 
     def visit_logical_expr(self, expr):
-        left = self.evaluate(expr.left)[0]
-        right = self.evaluate(expr.right)[0]
+        
+        # Get the left and right operands
+        left_value = self.evaluate(expr.left)
+        right_value = self.evaluate(expr.right)
+        
+        # Resolve identifiers and registers to their actual values
+        left = self.is_opponent_y_regis(left_value, expr.line)[0]
+        right = self.is_opponent_y_regis(right_value, expr.line)[0]
         
         if expr.operator.lexeme == '&':
             _eval_ = bool(left and right)
@@ -456,7 +467,9 @@ class Interpreter(ExprVisitor):
             raise ValueError(f"Unsupported logical operator: {expr.operator}")
 
     def visit_unary_expr(self, expr):
-        right = self.evaluate(expr.right)[0]
+        
+        right_value = self.evaluate(expr.right)
+        right = self.is_opponent_y_regis(right_value, expr.line)[0]
 
         if expr.operator.lexeme == '!':
             _eval_ = bool(not right)

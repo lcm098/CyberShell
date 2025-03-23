@@ -118,6 +118,8 @@ section .text ||
 	call write, fptr
 	"""
 	
+
+	"""
 	// List ELement Access
 	
 	mov eax, 11
@@ -138,4 +140,43 @@ section .text ||
 	link fptr, elx
 	call write, fptr
 	call emit, fptr
+
+	"""
+
+
+	"""
+	mov eax, 11
+	mov ebx, 12
+	mov ecx, 13
+	mov edx, 14
+	mov eex, 15
+	
+	compute vptr, [eax + ebx + eex]
+	load efx, vptr
+
+	mov egx, [efx]
+
+	link fptr, egx
+	call write, fptr
+	"""
+
+
+	"""
+	mov eax, ["Hello", 12, 9.9, True, False]
+	mov ebx, [#eax[3], #eax[4]]
+
+	link fptr, ebx
+	call write, fptr
+	"""
+
+
+	mov eax, [44, 66, 34, 85, 45]
+	compute vptr, [(#eax[1] <= #eax[0])]
+
+	load ebx, vptr
+	mov ecx, [ebx]
+
+	link fptr, ecx
+	call write, fptr
+
 ||

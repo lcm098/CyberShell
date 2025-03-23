@@ -14,6 +14,10 @@ class Environment:
         self.persistent_values = {}  # Store persistent registers
         self.enclosing = enclosing
 
+    # Debug Method
+    def log(self):
+        return self.values
+
     # Define method to store a variable
     def define(self, name, value, is_constant=False):
         if is_constant:

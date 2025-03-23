@@ -81,7 +81,7 @@ def process_command(buffer):
                     
                 lexer = Lexer(code)
                 token = lexer.scan_tokens()
-
+                
                 parser = Parser(token)
                 ast = parser.parse()
 

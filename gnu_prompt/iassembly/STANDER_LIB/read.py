@@ -6,14 +6,14 @@ class Read:
         self.args = args
         self.environment = environment
         
-    def read(self):
+    def read_it(self):
         
         buff = []
         
-        for item in  self.args:
+        for item in self.args:
              
-            temp = str(input(""))
-            if self.environment.is_defined(item, item, id(item)):
+            temp = input()
+            if self.environment.is_defined((item, item, id(item))):
                 self.environment.assign((item, item, id(item)), (temp, type(item).__name__, id(item)))
             else:
                 self.environment.define((item, item, id(item)), (temp, type(item).__name__, id(item)), False)

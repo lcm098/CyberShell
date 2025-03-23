@@ -33,7 +33,7 @@ class StanderLibrary:
         
     def call_read(self, args):
         _read_ = Read(args)
-        return _read_.read()
+        return _read_.read_it()
     
     def call_emit(self, args):
         _emit_ = Emit(args)

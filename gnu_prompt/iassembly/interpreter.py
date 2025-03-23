@@ -153,7 +153,7 @@ class Interpreter(ExprVisitor):
                 list_size = len(y_value)
                 if index[0] <= list_size:
                     final_list_element = y_value[index[0]]
-                    return [final_list_element]
+                    return final_list_element
                 else:
                     raise InstructionError(f"List Element Access : [access's size exceeded], size must be <= {list_size}, \n\tOn Line=[{line}]")
             else:

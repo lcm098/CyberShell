@@ -120,17 +120,22 @@ section .text ||
 	
 	// List ELement Access
 	
-	mov eax, 5
-	mov ebx, 10
-	mov ecx, 3
+	mov eax, 11
+	mov ebx, 12
+	mov ecx, 13
+	mov edx, 14
+	mov eex, 15
 
-	mov edx, [eax, ebx, ecx]
-	mov eex, #edx[2]
+	mov efx, [eax, ebx, ecx, edx, eex]
+	
+	mov egx, #efx[4]
+	mov ehx, #efx[3]
+	mov eix, #efx[2]
+	mov ejx, #efx[1]
+	mov ekx, #efx[0]
 
-	link fptr, eex
-	call write, fptrs
-
-	mov edx, [eax, ebx, ecx]
-	mov eex, #edx[2]
-
+	mov elx, [egx, ehx, eix, ejx, ekx]
+	link fptr, elx
+	call write, fptr
+	call emit, fptr
 ||

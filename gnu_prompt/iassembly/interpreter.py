@@ -2,6 +2,7 @@ from iassembly.parser import *
 from iassembly.buffer import *
 from iassembly.stdlib import *
 from iassembly.buffer import *
+from iassembly.stdvar import StdVar
 
 class ExprVisitor:
         
@@ -104,6 +105,9 @@ class Interpreter(ExprVisitor):
         self.environment = Environment()
         self.StanderLib = StanderLibrary()
         self.persistent_values = {}  # Store for persistent registers
+        self.Object = StdVar.Object()
+        self.Stander = StdVar.Stander()
+        self.Normal = StdVar.Normal()
         
     def visit_identifier(self, expr):
         return (expr.identifier.lexeme, "identifier", id(expr.identifier))
@@ -167,7 +171,7 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_x[1] in ("register") and opponent_y[1] in ("vptr", "cptr", "fptr", "rptr"):
+        if self.Normal.isNormal(opponent_x[1]) and self.Stander.isStander(opponent_y[1]):
             y_value = self.is_opponent_y_regis(opponent_y, line)
             self.push_in_environment(opponent_x, y_value)
             
@@ -180,7 +184,7 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_y[1] == "fptr":
+        if opponent_y[1] == self.Stander.fTypeRegister:
             while not isinstance(opponent_y, list):
                 opponent_y = self.environment.get(opponent_y)
             
@@ -188,11 +192,11 @@ class Interpreter(ExprVisitor):
             for item in opponent_y:
                 clean_list.append(item[0])
             
-            if opponent_x[1] == "identifier" and isinstance(opponent_y, list):
+            if opponent_x[1] == self.Object.iType and isinstance(opponent_y, list):
                 if self.StanderLib.check_right_system_function(opponent_x[0]):
                     
                     return_value = self.StanderLib.call_impropriated_function(opponent_x[0], clean_list)
-                    self.push_in_environment(("rptr", "rptr", id("rptr")), return_value)
+                    self.push_in_environment((self.Stander.rTypeRegister, self.Stander.rTypeRegister, id(self.Stander.rTypeRegister)), return_value)
                     
                 else:
                     raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
@@ -206,7 +210,7 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_x[1] == "vptr":
+        if opponent_x[1] == self.Stander.vTypeRegister:
             y_value = self.is_opponent_y_regis(opponent_y, line)
             self.push_in_environment(opponent_x, y_value)
         else:
@@ -217,8 +221,8 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_x[1] in ("vptr", "fptr", "cptr"):
-            if opponent_y[1] in ("register"):
+        if self.Stander.isStander(opponent_x[1]):
+            if opponent_y[1] in (self.Normal.eTypeRegister):
                 y_value = self.is_opponent_y_regis(opponent_y, line)
                 self.push_in_environment(opponent_x, y_value)
             else:
@@ -233,7 +237,7 @@ class Interpreter(ExprVisitor):
             opponent_y = self.evaluate(inst.opponent_y)
             
             # Handle const registers - prevent modification after initialization
-            if opponent_x[1] == "const":
+            if opponent_x[1] == self.Object.cType:
                 if self.environment.is_defined(opponent_x):
                     raise InstructionError(f"Cannot modify constant register {opponent_x[0]}. \n\tOn Line=[{line}]")
                 else:
@@ -246,7 +250,7 @@ class Interpreter(ExprVisitor):
                     return
             
             # Handle persistent registers - accumulate values
-            if opponent_x[1] == "persistent":
+            if opponent_x[1] == self.Object.pType:
                 persistent_id = opponent_x[0]
                 
                 if isinstance(opponent_y, list):
@@ -280,7 +284,7 @@ class Interpreter(ExprVisitor):
                 return
             
             # Standard register handling
-            if opponent_x[1] == "register":
+            if opponent_x[1] == self.Normal.eTypeRegister:
                 if isinstance(opponent_y, list):
                     clean_list = self.make_clean_list(opponent_y)
                     self.push_in_environment(opponent_x, clean_list)
@@ -298,7 +302,7 @@ class Interpreter(ExprVisitor):
     def make_clean_list(self, lst):
         clean = []
         for item in lst:
-            if item[1] in ("register", "vptr", "cptr", "fptr", "identifier", "const", "persistent"):
+            if self.Normal.isNormal(item[1]) or self.Stander.isStander(item[1]) or self.Object.isObject(item[1]):
                 value = self.environment.get(item)
                 if isinstance(value, list):
                     clean.append(self.make_clean_list(value))
@@ -309,26 +313,26 @@ class Interpreter(ExprVisitor):
         return clean
         
     def is_opponent_y_regis(self, y, line):
-        if (isinstance(y, list) or isinstance(y, tuple)) and y[1] in ("register", "identifier", "const", "persistent", "vptr", "cptr", "rptr", "fptr"):
+        if (isinstance(y, list) or isinstance(y, tuple)) and self.Normal.isNormal(y[1]) or self.Stander.isStander(y[1]) or self.Object.isObject(y[1]):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
                 # Check if the value is a list or another register reference
                 if isinstance(value, list):
                     return value  # Return the list directly
-                elif y[1] in ("register", "identifier", "const", "persistent"):
+                elif self.Normal.isNormal(y[1]) or self.Stander.isStander(y[1]) or self.Object.isObject(y[1]):
                     return self.is_opponent_y_regis(value, line)
                 else:
                     return value
             else:
                 # Special handling for persistent registers that might exist in persistent store
-                if y[1] == "persistent" and y[0] in self.persistent_values:
+                if y[1] == self.Object.pType and y[0] in self.persistent_values:
                     return self.persistent_values[y[0]]
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
             return y
             
     def push_in_environment(self, x, y, is_const=False):
-        if x[1] == "const":
+        if x[1] == self.Object.cType:
             is_const = True
             
         if self.environment.is_defined(x):

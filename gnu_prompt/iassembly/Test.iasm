@@ -73,7 +73,7 @@ section .text ||
 	call write, fptr
 	"""
 
-	
+	"""
 	mov pas, 55 // moving 55 to persistantRegister
 	mov pas, 5
 	mov edx, [pas]
@@ -93,4 +93,27 @@ section .text ||
 	// mov works with all Types of register except (f, v, c) PTR
 	// 'load' OpCode can load value to only from (v, f, c)PTR to ((e)Type register)
 	// Today create load OpCode and array element access
+
+	"""
+
+	mov eax, "eax"
+	mov ebx, "ebx"
+	mov ecx, "ecx"
+
+	mov edx, "Enter Three Names :  "
+	
+	mov efx, [edx]
+	mov egx, [eax, ebx, ecx]
+
+	link fptr, efx
+	call write, fptr
+
+	link fptr, egx
+	call read, fptr
+
+	
+	mov ehx, [eax, ebx, ecx]
+	link fptr, ehx
+	call write, fptr
+
 ||

@@ -1,6 +1,7 @@
 from iassembly.parser import *
 from iassembly.buffer import *
 from iassembly.stdlib import *
+from iassembly.environment import environment
 
 class ExprVisitor:
         
@@ -100,7 +101,7 @@ class InstructionError(Exception):
 class Interpreter(ExprVisitor):
     
     def __init__(self):
-        self.environment = Environment()
+        self.environment = environment
         self.StanderLib = StanderLibrary()
         self.persistent_values = {}  # Store for persistent registers
         
@@ -127,6 +128,9 @@ class Interpreter(ExprVisitor):
         # Return persistent register with its type
         return (expr.persis, "persistent", id(expr.persis))
     
+    def visit_rptr_pointer(self, expr):
+        return (expr.pointer, "rptr", id(expr.pointer))
+    
     def visit_make_hidden_list(self, expr):
         elements = expr.elements
         line = expr.line
@@ -142,6 +146,12 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
+        if opponent_x[1] in ("register") and opponent_y[1] in ("vptr", "cptr", "fptr", "rptr"):
+            y_value = self.environment.get(opponent_y)
+            self.push_in_environment(opponent_x, y_value)
+            
+        else:
+            raise InstructionError(f"invalid load x, y combination, where x should be (eTypeRegister) and y should be(v,c,f,r)TypeRegister only. \n\tOn Line =[{line}]")
         pass
         
     def visit_call_instruction(self, inst):
@@ -159,7 +169,10 @@ class Interpreter(ExprVisitor):
             
             if opponent_x[1] == "identifier" and isinstance(opponent_y, list):
                 if self.StanderLib.check_right_system_function(opponent_x[0]):
-                    self.StanderLib.call_impropriated_function(opponent_x[0], clean_list)
+                    
+                    return_value = self.StanderLib.call_impropriated_function(opponent_x[0], clean_list)
+                    self.push_in_environment(("rptr", "rptr", id("rptr")), return_value)
+                    
                 else:
                     raise InstructionError(f"Not impropriated function {opponent_y}. \n\tOn Line=[{line}]")
             else:
@@ -224,8 +237,8 @@ class Interpreter(ExprVisitor):
                 if isinstance(opponent_y, list):
                     clean_list = self.make_clean_list(opponent_y)
                     # Check if we should accumulate or replace
-                    if persistent_id in self.persistent_values:
-                        old_value = self.persistent_values[persistent_id]
+                    if self.environment.has_persistent(persistent_id):
+                        old_value = self.environment.get_persistent(persistent_id)
                         # Accumulate if numeric
                         if isinstance(old_value, list) and len(old_value) > 0 and isinstance(old_value[0][0], (int, float)) and \
                            isinstance(clean_list[0][0], (int, float)):
@@ -234,20 +247,20 @@ class Interpreter(ExprVisitor):
                             result_type = "int" if isinstance(result_value, int) else "float"
                             clean_list = [(result_value, result_type, id(result_value))]
                     
-                    self.persistent_values[persistent_id] = clean_list
+                    self.environment.store_persistent(persistent_id, clean_list)
                     self.push_in_environment(opponent_x, clean_list)
                 else:
                     value = self.is_opponent_y_regis(opponent_y, line)
                     # Check if we should accumulate or replace
-                    if persistent_id in self.persistent_values:
-                        old_value = self.persistent_values[persistent_id]
+                    if self.environment.has_persistent(persistent_id):
+                        old_value = self.environment.get_persistent(persistent_id)
                         if isinstance(old_value[0], (int, float)) and isinstance(value[0], (int, float)):
                             # Create proper value tuple preserving the format
                             result_value = old_value[0] + value[0]
                             result_type = "int" if isinstance(result_value, int) else "float"
                             value = (result_value, result_type, id(result_value))
                     
-                    self.persistent_values[persistent_id] = value
+                    self.environment.store_persistent(persistent_id, value)
                     self.push_in_environment(opponent_x, value)
                 return
             

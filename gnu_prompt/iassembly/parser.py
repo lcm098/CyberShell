@@ -272,6 +272,17 @@ class Expr:
         
         def accept(self, visitor):
             return visitor.visit_const_register(self)
+        
+        
+    class ReturnPointerList:
+        def __init__(self, pointer):
+            self.pointer = pointer
+        
+        def __repr__(self):
+            return f"rptr=({self.pointer})"
+        
+        def accept(self, visitor):
+            return visitor.visit_rptr_pointer(self)
     
     
 class ParseError(Exception):
@@ -293,6 +304,7 @@ class Parser:
             self.consume(TokenType.DOT, "Expected '.' in the entry-point of text-code")
             self.consume(TokenType.TEXT, "Expected 'text' as the entry-point of code")
             self.consume(TokenType.DOUBLE_OR, "Expected '||' environment-encloser of main-text code")
+            
             statements = []
                 
             # Use peek instead of match to avoid consuming the end token prematurely
@@ -429,6 +441,8 @@ class Parser:
             return Expr.ValuePointerList("vptr")
         if self.match(TokenType.CPTR):
             return Expr.ComparePointerList("cptr")
+        if self.match(TokenType.RPTR):
+            return Expr.ReturnPointerList("rptr")
         
         if self.match(TokenType.EAX):
             return Expr.Register("eax")
@@ -554,7 +568,7 @@ class Parser:
             return Expr.MakeHiddenList(elements, line)
             
         error_token = self.peek()
-        self.error(error_token, "Expect expression.", self.current)
+        self.error(error_token, "unexpected expression.", self.current)
 
     def handle_unknown_block_statement(self):
         unknown_block = self.block()

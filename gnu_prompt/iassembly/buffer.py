@@ -10,6 +10,7 @@ class Environment:
     def __init__(self, enclosing=None):
         self.values = {}
         self.constants = set()  # To store names of constant variables
+        self.persistent_values = {}  # Store for persistent registers
         self.enclosing = enclosing
 
     # Define method to store a variable
@@ -54,3 +55,24 @@ class Environment:
             return self.enclosing.is_const(name)
         else:
             return False
+            
+    # Methods for persistent values
+    def store_persistent(self, name, value):
+        """Store a value in the persistent storage."""
+        self.persistent_values[name] = value
+        
+    def get_persistent(self, name):
+        """Get a value from persistent storage."""
+        if name in self.persistent_values:
+            return self.persistent_values[name]
+        if self.enclosing is not None:
+            return self.enclosing.get_persistent(name)
+        return None
+        
+    def has_persistent(self, name):
+        """Check if a persistent value exists."""
+        if name in self.persistent_values:
+            return True
+        if self.enclosing is not None:
+            return self.enclosing.has_persistent(name)
+        return False

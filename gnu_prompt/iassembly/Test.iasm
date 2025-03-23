@@ -65,8 +65,8 @@ section .text ||
 	link ebx, vptr
 	compute vptr, [3*9]
 	link ecx, vptr
-    compute vptr, [(False & True) == True] // which is False
-    link efx, vptr
+    	compute vptr, [(False & True) == True] // which is False
+    	link efx, vptr
 	
 	mov edx, [eax, ebx, ecx, efx]
 	link fptr, edx
@@ -96,9 +96,39 @@ section .text ||
 
 	"""
 
+	
+	"""
+	mov edx, "Enter Three Names :  "
+	
+	mov efx, [edx]
+	mov egx, [0, 0, 0]
+
+	link fptr, efx
+	call write, fptr
+
+	link fptr, egx
+	call read, fptr
+	
+	// all return value from function will in rptr (in the form of list)
+	
+	load eax, rptr // get return value from read() function to rptr
+	link fptr, eax
+	
+	
+	call write, fptr
+	"""
+	
+	// List ELement Access
+	
 	mov eax, 5
 	mov ebx, 10
 	mov ecx, 3
+
+	mov edx, [eax, ebx, ecx]
+	mov eex, #edx[2]
+
+	link fptr, eex
+	call write, fptrs
 
 	mov edx, [eax, ebx, ecx]
 	mov eex, #edx[2]

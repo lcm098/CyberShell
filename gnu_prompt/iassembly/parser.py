@@ -569,10 +569,11 @@ class Parser:
             ident = self.consume(TokenType.IDENTIFIER, "Expected an Identifier")
             return Expr.Identifier(ident)
         
-        if self.check(TokenType.HANT_OPERATOR):
+        if self.match(TokenType.HANT_OPERATOR):
+            line = self.peek().line
             name = self.expression()
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' this, to enclose the index. while trying to access single list element")
-            value = self.consume(TokenType.INT, "Expected 'integer number' while accessing single list element")
+            value = self.expression()
             self.consume(TokenType.RIGHT_BRACKET, "Expected ']' this, to enclose the index. while trying to access single list element")
             return Expr.AccessListItem(line, name, value)
         

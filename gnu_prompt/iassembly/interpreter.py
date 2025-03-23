@@ -1,7 +1,7 @@
 from iassembly.parser import *
 from iassembly.buffer import *
 from iassembly.stdlib import *
-from iassembly.environment import environment
+from iassembly.buffer import *
 
 class ExprVisitor:
         
@@ -101,7 +101,7 @@ class InstructionError(Exception):
 class Interpreter(ExprVisitor):
     
     def __init__(self):
-        self.environment = environment
+        self.environment = Environment()
         self.StanderLib = StanderLibrary()
         self.persistent_values = {}  # Store for persistent registers
         
@@ -138,7 +138,6 @@ class Interpreter(ExprVisitor):
         clean_list = []
         for item in elements:
             clean_list.append(self.is_opponent_y_regis(self.evaluate(item), line))
-        
         return clean_list
     
     def visit_list_element_access(self, expr):
@@ -147,23 +146,18 @@ class Interpreter(ExprVisitor):
         line = expr.line
         
         if self.environment.is_defined(name):
-            fetched = self.environment.get(name)
+            y_value = self.environment.get(name)
             
-            # Check if fetched is a list and index is valid
-            if isinstance(fetched, list):
-                # Extract index value if it's a tuple (like your other values)
-                if isinstance(index, tuple) and len(index) >= 1:
-                    index_value = index[0]
+            if isinstance(y_value, list):
+                
+                list_size = len(y_value)
+                if index[0] <= list_size:
+                    final_list_element = y_value[index[0]]
+                    return [final_list_element]
                 else:
-                    index_value = index
-                    
-                # Validate index
-                if isinstance(index_value, int) and 0 <= index_value < len(fetched):
-                    return fetched[index_value]
-                else:
-                    raise InstructionError(f"Invalid index {index_value} for list {name}. \n\tOn Line=[{line}]")
+                    raise InstructionError(f"List Element Access : [access's size exceeded], size must be <= {list_size}, \n\tOn Line=[{line}]")
             else:
-                raise InstructionError(f"{name} is not a list, cannot access element. \n\tOn Line=[{line}]")
+                raise InstructionError(f"What The Fuck : [you are trying to access '{y_value}'s' element, which is not a list]")
         else:
             raise InstructionError(f"List {name} is not defined. \n\tOn Line=[{line}]")
     

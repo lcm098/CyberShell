@@ -98,9 +98,11 @@ class InstructionError(Exception):
         return self.message
     
 class Interpreter(ExprVisitor):
+    
     def __init__(self):
         self.environment = Environment()
         self.StanderLib = StanderLibrary()
+        self.persistent_values = {}  # Store for persistent registers
         
     def visit_identifier(self, expr):
         return (expr.identifier.lexeme, "identifier", id(expr.identifier))
@@ -117,6 +119,14 @@ class Interpreter(ExprVisitor):
     def visit_compare_pointer_list(self, expr):
         return (expr.pointer, "cptr", id(expr.pointer))
     
+    def visit_const_register(self, expr):
+        # Return const register with its type
+        return (expr.const, "const", id(expr.const))
+    
+    def visit_persistent_register(self, expr):
+        # Return persistent register with its type
+        return (expr.persis, "persistent", id(expr.persis))
+    
     def visit_make_hidden_list(self, expr):
         elements = expr.elements
         line = expr.line
@@ -132,10 +142,7 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_x[1] == "register":
-            self.push_in_environment(opponent_x, list(self.is_opponent_y_regis(opponent_y, line)))
-        else:
-            raise InstructionError(f"identifier {opponent_x} is not a 'register' type. \n\tOn Line=[{line}]")
+        pass
         
     def visit_call_instruction(self, inst):
         line = inst.line
@@ -176,7 +183,6 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         if opponent_y[1] in ("register"):
-            
             if opponent_x[1] in ("vptr", "fptr", "cptr"):
                 y_value = self.environment.get(opponent_y)
                 self.push_in_environment(opponent_x, y_value)
@@ -191,30 +197,80 @@ class Interpreter(ExprVisitor):
                 raise InstructionError(f"Unable to store value {opponent_y} in {opponent_x}, use opponent 'e(Register)Type'. \n\tOn Line=[{line}]")
         else:
             raise InstructionError(f"opponent_y expected as (e)Type or (v)Type register but, i got {opponent_y}")
-
             
-        
     def visit_mov_instruction(self, inst):
-        
         try:
             line = inst.line
             opponent_x = self.evaluate(inst.opponent_x)
             opponent_y = self.evaluate(inst.opponent_y)
             
-            if opponent_x[1] == "register" and isinstance(opponent_y, list):
-                clean_list = self.make_clean_list(opponent_y)
-                self.push_in_environment(opponent_x, clean_list)
-                
-            elif opponent_x[1] == "register" and (not isinstance(opponent_y, list)):
-                self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line))
+            # Handle const registers - prevent modification after initialization
+            if opponent_x[1] == "const":
+                if self.environment.is_defined(opponent_x):
+                    raise InstructionError(f"Cannot modify constant register {opponent_x[0]}. \n\tOn Line=[{line}]")
+                else:
+                    # First initialization of a constant register
+                    if isinstance(opponent_y, list):
+                        clean_list = self.make_clean_list(opponent_y)
+                        self.push_in_environment(opponent_x, clean_list, is_const=True)
+                    else:
+                        self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line), is_const=True)
+                    return
             
+            # Handle persistent registers - accumulate values
+            if opponent_x[1] == "persistent":
+                persistent_id = opponent_x[0]
+                
+                if isinstance(opponent_y, list):
+                    clean_list = self.make_clean_list(opponent_y)
+                    # Check if we should accumulate or replace
+                    if persistent_id in self.persistent_values:
+                        old_value = self.persistent_values[persistent_id]
+                        # Accumulate if numeric
+                        if isinstance(old_value, list) and len(old_value) > 0 and isinstance(old_value[0][0], (int, float)) and \
+                           isinstance(clean_list[0][0], (int, float)):
+                            # Create proper value tuple preserving the format
+                            result_value = old_value[0][0] + clean_list[0][0]
+                            result_type = "int" if isinstance(result_value, int) else "float"
+                            clean_list = [(result_value, result_type, id(result_value))]
+                    
+                    self.persistent_values[persistent_id] = clean_list
+                    self.push_in_environment(opponent_x, clean_list)
+                else:
+                    value = self.is_opponent_y_regis(opponent_y, line)
+                    # Check if we should accumulate or replace
+                    if persistent_id in self.persistent_values:
+                        old_value = self.persistent_values[persistent_id]
+                        if isinstance(old_value[0], (int, float)) and isinstance(value[0], (int, float)):
+                            # Create proper value tuple preserving the format
+                            result_value = old_value[0] + value[0]
+                            result_type = "int" if isinstance(result_value, int) else "float"
+                            value = (result_value, result_type, id(result_value))
+                    
+                    self.persistent_values[persistent_id] = value
+                    self.push_in_environment(opponent_x, value)
+                return
+            
+            # Standard register handling
+            if opponent_x[1] == "register":
+                if isinstance(opponent_y, list):
+                    clean_list = self.make_clean_list(opponent_y)
+                    self.push_in_environment(opponent_x, clean_list)
+                else:
+                    value = self.is_opponent_y_regis(opponent_y, line)
+                    # If value is a list, handle it properly
+                    if isinstance(value, list):
+                        self.push_in_environment(opponent_x, value)
+                    else:
+                        self.push_in_environment(opponent_x, value)
+                        
         except Exception as err:
             raise InstructionError(str(err)+f"\n\tOn Line=[{line}]")
         
     def make_clean_list(self, lst):
         clean = []
         for item in lst:
-            if item[1] in ("register", "vptr", "cptr", "fptr", "identifier"):
+            if item[1] in ("register", "vptr", "cptr", "fptr", "identifier", "const", "persistent"):
                 value = self.environment.get(item)
                 if isinstance(value, list):
                     clean.append(self.make_clean_list(value))
@@ -224,25 +280,33 @@ class Interpreter(ExprVisitor):
                 clean.append(item)
         return clean
         
-        
     def is_opponent_y_regis(self, y, line):
-        
-        if y[1] in ("register", "identifier"):
+        if y[1] in ("register", "identifier", "const", "persistent"):
             if self.environment.is_defined(y):
                 value = self.environment.get(y)
-                if y[1] in ("register", "identifier"):
+                # Check if the value is a list or another register reference
+                if isinstance(value, list):
+                    return value  # Return the list directly
+                elif y[1] in ("register", "identifier", "const", "persistent"):
                     return self.is_opponent_y_regis(value, line)
                 else:
                     return value
             else:
+                # Special handling for persistent registers that might exist in persistent store
+                if y[1] == "persistent" and y[0] in self.persistent_values:
+                    return self.persistent_values[y[0]]
                 raise InstructionError(f"using of {y} without initialing it, before.")
         else:
             return y
             
-    
     def push_in_environment(self, x, y, is_const=False):
-        
+        if x[1] == "const":
+            is_const = True
+            
         if self.environment.is_defined(x):
+            # Prevent reassigning to const registers
+            if self.environment.is_const(x):
+                raise InstructionError(f"Cannot reassign constant register {x[0]}")
             self.environment.assign(x, y)
         else:
             self.environment.define(x, y, is_const)

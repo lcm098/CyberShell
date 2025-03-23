@@ -58,6 +58,7 @@ section .text ||
 	]
 	"""
 	
+	"""
 	compute vptr, [(5+5)]
 	link eax, vptr
 	compute vptr, [4+4]
@@ -70,5 +71,26 @@ section .text ||
 	mov edx, [eax, ebx, ecx, efx]
 	link fptr, edx
 	call write, fptr
+	"""
+
 	
+	mov pas, 55 // moving 55 to persistantRegister
+	mov pas, 5
+	mov edx, [pas]
+
+	link fptr, edx
+	call write, fptr
+
+
+	mov ras, 34 // move 43 in const ras
+	mov rbs, [ras] // creating a constant list
+	
+	mov eax, rbs // moving const list to eax (eTypeReg)
+	link fptr, eax
+	call write, fptr
+
+	// can not link (persistent type and constant type) to (f, v, c)PTR
+	// mov works with all Types of register except (f, v, c) PTR
+	// 'load' OpCode can load value to only from (v, f, c)PTR to ((e)Type register)
+	// Today create load OpCode and array element access
 ||

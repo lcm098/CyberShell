@@ -252,6 +252,28 @@ class Expr:
             return visitor.visit_link_instruction(self)
     
     
+    class PersistentRegister:
+        def __init__(self, persis):
+            self.persis = persis
+        
+        def __repr__(self):
+            return f"persis=({self.persis})"
+        
+        def accept(self, visitor):
+            return visitor.visit_persistent_register(self)
+        
+        
+    class ConstRegister:
+        def __init__(self, const):
+            self.const = const
+        
+        def __repr__(self):
+            return f"const=({self.const})"
+        
+        def accept(self, visitor):
+            return visitor.visit_const_register(self)
+    
+    
 class ParseError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -420,10 +442,80 @@ class Parser:
             return Expr.Register("eex")
         if self.match(TokenType.EFX):
             return Expr.Register("efx")
+        if self.match(TokenType.EGX):
+            return Expr.Register("egx")
+        if self.match(TokenType.EHX):
+            return Expr.Register("ehx")
+        if self.match(TokenType.EIX):
+            return Expr.Register("eix")
+        if self.match(TokenType.EJX):
+            return Expr.Register("ejx")
+        if self.match(TokenType.EKX):
+            return Expr.Register("ekx")
+        if self.match(TokenType.ELX):
+            return Expr.Register("elx")
+        if self.match(TokenType.EMX):
+            return Expr.Register("emx")
+        if self.match(TokenType.ENX):
+            return Expr.Register("enx")
+        if self.match(TokenType.EOX):
+            return Expr.Register("eox")
+        if self.match(TokenType.EPX):
+            return Expr.Register("epx")
+        if self.match(TokenType.EQX):
+            return Expr.Register("eqx")
+        if self.match(TokenType.ERX):
+            return Expr.Register("erx")
+        if self.match(TokenType.ESX):
+            return Expr.Register("esx")
+        if self.match(TokenType.ETX):
+            return Expr.Register("etx")
+        if self.match(TokenType.EUX):
+            return Expr.Register("eux")
+        if self.match(TokenType.EVX):
+            return Expr.Register("evx")
+        if self.match(TokenType.EWX):
+            return Expr.Register("ewx")
         if self.match(TokenType.EXX):
             return Expr.Register("exx")
+        if self.match(TokenType.EYX):
+            return Expr.Register("eyx")
         if self.match(TokenType.EZX):
             return Expr.Register("ezx")
+        
+        if self.match(TokenType.PAS):
+            return Expr.PersistentRegister("pas")
+        if self.match(TokenType.PBS):
+            return Expr.PersistentRegister("pbs")
+        if self.match(TokenType.PCS):
+            return Expr.PersistentRegister("pcs")
+        if self.match(TokenType.PDS):
+            return Expr.PersistentRegister("pds")
+        if self.match(TokenType.PES):
+            return Expr.PersistentRegister("pes")
+        if self.match(TokenType.PFS):
+            return Expr.PersistentRegister("pfs")
+        if self.match(TokenType.PXS):
+            return Expr.PersistentRegister("pxs")
+        if self.match(TokenType.PZS):
+            return Expr.PersistentRegister("pzs")
+        
+        if self.match(TokenType.RAS):
+            return Expr.ConstRegister("ras")
+        if self.match(TokenType.RBS):
+            return Expr.ConstRegister("rbs")
+        if self.match(TokenType.RCS):
+            return Expr.ConstRegister("rcs")
+        if self.match(TokenType.RDS):
+            return Expr.ConstRegister("rds")
+        if self.match(TokenType.RES):
+            return Expr.ConstRegister("res")
+        if self.match(TokenType.RFS):
+            return Expr.ConstRegister("rfs")
+        if self.match(TokenType.RXS):
+            return Expr.ConstRegister("rxs")
+        if self.match(TokenType.RZS):
+            return Expr.ConstRegister("rzs")
         
         if self.match(TokenType.INT):
             return Expr.INT(self.previous().literal)

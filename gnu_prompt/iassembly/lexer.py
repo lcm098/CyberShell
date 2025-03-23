@@ -92,8 +92,27 @@ ECX = "ECX"
 EDX = "EDX"
 EEX = "EEX"
 EFX = "EFX"
+EGX = "EGX"
+EHX = "EHX"
+EIX = "EIX"
+EJX = "EJX"
+EKX = "EKX"
+ELX = "ELX"
+EMX = "EMX"
+ENX = "ENX"
+EOX = "EOX"
+EPX = "EPX"
+EQX = "EQX"
+ERX = "ERX"
+ESX = "ESX"
+ETX = "ETX"
+EUX = "EUX"
+EVX = "EVX"
+EWX = "EWX"
 EXX = "EXX"
+EYX = "EYX"
 EZX = "EZX"
+
 FPTR = "FPTR"
 VPTR = "VPTR"
 CPTR = "CPTR"
@@ -102,6 +121,25 @@ DL = "DL"
 DR = "DR"
 INCREMENT = "INCREMENT"
 DECREMENT = "DECREMENT"
+
+RAS = "RAS"
+RBS = "RBS"
+RCS = "RCS"
+RDS = "RDS"
+RES = "RES"
+RFS = "RFS"
+RXS = "RXS"
+RZS = "RZS"
+
+PAS = "PAS"
+PBS = "PBS"
+PCS = "PCS"
+PDS = "PDS"
+PES = "PES"
+PFS = "PFS"
+PXS = "PXS"
+PZS = "PZS"
+
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -113,7 +151,9 @@ TOKEN_TYPES = [
     DATA_EQUAL, TRUE, FALSE, NONE, PUSHA, POPA, CLSV, LINK, IS, ARRAY_GROUP_OPERATOR,
     INVOKE, SET, GET, INJECT, HANT_OPERATOR, POW, SQRT, CEIL, FLOOR,
     PLUS, MINUS, SLASH, STAR, MODULUS, AT_THE_RATE, COMPUTE, EAX, EBX, ECX, EDX, EFX,
-    EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT
+    EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT, EGX, EHX,
+    EIX, EJX, EKX, ELX, EMX, ENX, EOX, EPX, EQX, ERX, ESX, ETX, EUX, EVX, EWX, EYX,
+    RAS, RBS,  RCS, RDS, RES, RFS, RXS, RZS, PAS, PBS,  PCS, PDS, PES, PFS, PXS, PZS
 ]
 
 keywords = {
@@ -123,14 +163,53 @@ keywords = {
     "edx" : EDX,
     "eex" : EEX,
     "efx" : EFX,
+    "egx" : EGX,
+    "ehx" : EHX,
+    "eix" : EIX,
+    "ejx" : EJX,
+    "ekx" : EKX,
+    "elx" : ELX,
+    "emx" : EMX,
+    "enx" : ENX,
+    "eox" : EOX,
+    "epx" : EPX,
+    "eqx" : EQX,
+    "erx" : ERX,
+    "esx" : ESX,
+    "etx" : ETX,
+    "eux" : EUX,
+    "evx" : EVX,
+    "ewx" : EWX,
+    "eyx" : EYX,
     "exx" : EXX,
     "ezx" : EZX,
+    
     "fptr" : FPTR,
     "vptr" : VPTR,
     "cptr" : CPTR,
+    
     "dl" : DL,
     "dd" : DD,
     "dr" : DR,
+    
+    "ras" : RAS,
+    "rbs" : RBS,
+    "rcs" : RCS,
+    "rds" : RDS,
+    "res" : RES,
+    "rfs" : RFS,
+    "rxs" : RXS,
+    "rzs" : RZS,
+    
+    "pas" : PAS,
+    "pbs" : PBS,
+    "pcs" : PCS,
+    "pds" : PDS,
+    "pes" : PES,
+    "pfs" : PFS,
+    "pxs" : PXS,
+    "pzs" : PZS,
+    
     "call" : CALL,
     "mov" : MOV,
     "fiptr" : FIPTR,
@@ -490,6 +569,14 @@ class TokenType:
     FALSE = "FALSE"
     NONE = "NONE"
     PUSHA = "PUSHA"
+    RAS = "RAS"
+    RBS = "RBS"
+    RCS = "RCS"
+    RDS = "RDS"
+    RES = "RES"
+    RFS = "RFS"
+    RXS = "RXS"
+    RZS = "RZS"
     POPA = "POPA"
     CLSV = "CLSV" # clear variable
     LINK = "LINK"
@@ -515,7 +602,25 @@ class TokenType:
     EDX = "EDX"
     EEX = "EEX"
     EFX = "EFX"
+    EGX = "EGX"
+    EHX = "EHX"
+    EIX = "EIX"
+    EJX = "EJX"
+    EKX = "EKX"
+    ELX = "ELX"
+    EMX = "EMX"
+    ENX = "ENX"
+    EOX = "EOX"
+    EPX = "EPX"
+    EQX = "EQX"
+    ERX = "ERX"
+    ESX = "ESX"
+    ETX = "ETX"
+    EUX = "EUX"
+    EVX = "EVX"
+    EWX = "EWX"
     EXX = "EXX"
+    EYX = "EYX"
     EZX = "EZX"
     FPTR = "FPTR"
     VPTR = "VPTR"
@@ -523,3 +628,11 @@ class TokenType:
     DD = "DD"
     DL = "DL"
     DR = "DR"
+    PAS = "PAS"
+    PBS = "PBS"
+    PCS = "PCS"
+    PDS = "PDS"
+    PES = "PES"
+    PFS = "PFS"
+    PXS = "PXS"
+    PZS = "PZS"

@@ -45,3 +45,12 @@ class Environment:
             self.enclosing.assign(name, value)
         else:
             raise Throw_Error(f"Undefined variable '{name}'.")
+        
+    def is_const(self, name):
+        """Check if a register is a constant."""
+        if name in self.constants:
+            return True
+        elif self.enclosing is not None:
+            return self.enclosing.is_const(name)
+        else:
+            return False

@@ -96,24 +96,11 @@ section .text ||
 
 	"""
 
-	mov eax, "eax"
-	mov ebx, "ebx"
-	mov ecx, "ecx"
+	mov eax, 5
+	mov ebx, 10
+	mov ecx, 3
 
-	mov edx, "Enter Three Names :  "
-	
-	mov efx, [edx]
-	mov egx, [eax, ebx, ecx]
-
-	link fptr, efx
-	call write, fptr
-
-	link fptr, egx
-	call read, fptr
-
-	
-	mov ehx, [eax, ebx, ecx]
-	link fptr, ehx
-	call write, fptr
+	mov edx, [eax, ebx, ecx]
+	mov eex, #edx[2]
 
 ||

@@ -285,6 +285,19 @@ class Expr:
             return visitor.visit_rptr_pointer(self)
     
     
+    class AccessListItem:
+        def __init__(self, line, name, value):
+            self.name = name
+            self.index = value
+            self.line = line
+        
+        def __repr__(self):
+            return f"ListElementAccess=(name={self.name}, index={self.index}, line={self.line})"
+        
+        def accept(self, visitor):
+            return visitor.visit_list_element_access(self)
+    
+    
 class ParseError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -555,6 +568,13 @@ class Parser:
             self.past(distance=1)
             ident = self.consume(TokenType.IDENTIFIER, "Expected an Identifier")
             return Expr.Identifier(ident)
+        
+        if self.check(TokenType.HANT_OPERATOR):
+            name = self.expression()
+            self.consume(TokenType.LEFT_BRACKET, "Expected '[' this, to enclose the index. while trying to access single list element")
+            value = self.consume(TokenType.INT, "Expected 'integer number' while accessing single list element")
+            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' this, to enclose the index. while trying to access single list element")
+            return Expr.AccessListItem(line, name, value)
         
         if self.match(TokenType.LEFT_BRACKET):
             line = self.peek().line

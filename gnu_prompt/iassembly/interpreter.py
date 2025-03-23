@@ -141,6 +141,33 @@ class Interpreter(ExprVisitor):
         
         return clean_list
     
+    def visit_list_element_access(self, expr):
+        name = self.evaluate(expr.name)
+        index = self.evaluate(expr.index)
+        line = expr.line
+        
+        if self.environment.is_defined(name):
+            fetched = self.environment.get(name)
+            
+            # Check if fetched is a list and index is valid
+            if isinstance(fetched, list):
+                # Extract index value if it's a tuple (like your other values)
+                if isinstance(index, tuple) and len(index) >= 1:
+                    index_value = index[0]
+                else:
+                    index_value = index
+                    
+                # Validate index
+                if isinstance(index_value, int) and 0 <= index_value < len(fetched):
+                    return fetched[index_value]
+                else:
+                    raise InstructionError(f"Invalid index {index_value} for list {name}. \n\tOn Line=[{line}]")
+            else:
+                raise InstructionError(f"{name} is not a list, cannot access element. \n\tOn Line=[{line}]")
+        else:
+            raise InstructionError(f"List {name} is not defined. \n\tOn Line=[{line}]")
+    
+    
     def visit_load_instruction(self, inst):
         line = inst.line
         opponent_x = self.evaluate(inst.opponent_x)

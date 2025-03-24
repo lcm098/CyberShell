@@ -162,7 +162,9 @@ section .text ||
 	"""
 
 
-	mov ecx, 5
+	label start, from_here
+
+	mov ecx, 2
 	mov edx, 5
 
 	cmp [ecx > edx] 
@@ -183,6 +185,10 @@ section .text ||
 		link fptr, eax
 		call write, fptr
 	]
+
+	label end
+	
+	jump from_here
 
 	// 'link' use to link value from eTypeRegister to (v, c, f, r)Register
 	// 'load' use to load value from (v, c, f, r)Register to eTypeRegister

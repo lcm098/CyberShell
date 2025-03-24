@@ -319,7 +319,28 @@ class Expr:
         
         def accept(self, visitor):
             return visitor.visit_cmp_handler(self)
+        
     
+    class LabelEntryFrame:
+        def __init__(self, label_name, label_block):
+            self.label_name = label_name
+            self.label_block = label_block
+        
+        def __repr__(self):
+            return f"LabelEntryFrame=(label_name=({self.label_name}), label_block=({self.label_block}))"
+        
+        def accept(self, visitor):
+            return visitor.visit_label_entry_frame(self)
+    
+    class JumpInstruction:
+        def __init__(self, label_name):
+            self.label_name = label_name
+        
+        def __repr__(self):
+            return f"JumpInstruction=(label_name=({self.label_name}))"
+        
+        def accept(self, visitor):
+            return visitor.visit_jump_instruction(self)
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -373,8 +394,32 @@ class Parser:
         elif self.match(TokenType.CMP):
             return self.handle_compare_statement()
         
+        elif self.match(TokenType.LABEL):
+            return self.handle_label_template()
+        
+        elif self.match(TokenType.JUMP):
+            return self.handle_jump_instruction()
+        
         return self.expression()
 
+
+    def handle_jump_instruction(self):
+        label_name = self.expression()
+        return Expr.JumpInstruction(label_name)
+
+    def handle_label_template(self):
+        self.consume(TokenType.STAR, "Expected 'start' for starting  the label")
+        self.consume(TokenType.COMMA, "Expected ',' after compute x [label x, y]")
+        label_name = self.expression()
+        label_block = self.consume_label_block()
+        self.consume(TokenType.END, "Expected 'end' for ending the label")
+        return Expr.LabelEntryFrame(label_name, label_block)
+        
+    def consume_label_block(self):
+        block = []
+        while not self.match(TokenType.LABEL):
+            block.append(self.declaration())
+        return block
 
     def handle_compare_statement(self):
         

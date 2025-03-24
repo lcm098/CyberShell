@@ -142,6 +142,10 @@ RPTR = "RPTR"
 
 ELIF = "ELIF"
 ELSE = "ELSE"
+LABEL = "LABEL"
+JUMP = "JUMP"
+END = "END"
+START = "START"
 
 
 TOKEN_TYPES = [
@@ -157,7 +161,7 @@ TOKEN_TYPES = [
     EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT, EGX, EHX,
     EIX, EJX, EKX, ELX, EMX, ENX, EOX, EPX, EQX, ERX, ESX, ETX, EUX, EVX, EWX, EYX,
     RAS, RBS,  RCS, RDS, RES, RFS, RXS, RZS, PAS, PBS,  PCS, PDS, PES, PFS, PXS, PZS,
-    RPTR, ELIF, ELSE
+    RPTR, ELIF, ELSE, LABEL, JUMP, END, START
 ]
 
 keywords = {
@@ -246,7 +250,8 @@ keywords = {
     "jmp" : JMP,
     "invoke" : INVOKE,
     "set" : SET,
-    
+    "label" : LABEL,
+    "jump" : JUMP,
     "push" : PUSH,
     "pop" : POP,
     "rptr" : RPTR,
@@ -262,7 +267,9 @@ keywords = {
     "data" : DATA,
     "bss" : BSS,
     "return" : RETURN,
-    "exec" : EXEC
+    "exec" : EXEC,
+    "end" : END,
+    "start" : START
 }
 
 class Token:
@@ -512,6 +519,8 @@ class TokenType:
     MOV = "MOV"
     ADD = "ADD"
     SUB = "SUB"
+    LABEL = "LABEL"
+    JUMP = "JUMP"
     MUL = "MUL"
     DIV = "DIV"
     MOD = "MOD"
@@ -643,3 +652,5 @@ class TokenType:
     PXS = "PXS"
     PZS = "PZS"
     RPTR = "RPTR"
+    END = "END"
+    START = "START"

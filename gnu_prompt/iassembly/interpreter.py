@@ -75,6 +75,31 @@ class Interpreter(ExprVisitor):
     def visit_rptr_pointer(self, expr):
         return (expr.pointer, "rptr", id(expr.pointer))
     
+    
+    def visit_label_entry_frame(self, inst):
+        label_name = self.evaluate(inst.label_name)[0]
+        label_block = inst.label_block
+        
+        if self.environment.is_defined(label_name):
+            raise InstructionError(f"Fuck, The Label with name {label_name} already  defined at two places")
+        else:
+            # 1. it will define for later jump call to execute this label
+            # 2. execute label function written for current execution of label,
+            # i mean, i want to say, it do not have to behave like function
+            self.environment.define(label_name, label_block)
+            self.execute_block(label_block)
+        
+        
+    def visit_jump_instruction(self, inst):
+        label_name = self.evaluate(inst.label_name)[0]
+        
+        if self.environment.is_defined(label_name):
+            label_block = self.environment.get(label_name)
+            self.execute_block(label_block)
+        else:
+            raise InstructionError(f"Fuck again, The Label with name {label_name} is not defined in current environment scope. why?")
+    
+    
     def visit_cmp_handler(self, inst):
         cmp_condition = inst.cmp_condition
         cmp_branches = inst.cmp_branches

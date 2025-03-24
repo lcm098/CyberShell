@@ -88,11 +88,11 @@ class Interpreter(ExprVisitor):
         cmp_result = self.evaluate(cmp_condition)[0]
         elif_result = self.evaluate(elif_condition)[0]
         
-        if cmp_result is True:
+        if cmp_result:
             self.execute_block(cmp_branches)
-        elif elif_result is True:
+        elif elif_result:
             self.execute_block(elif_branches)
-        elif else_block is not None:
+        elif else_block:
             self.execute_block(else_block)
     
     def visit_make_hidden_list(self, expr):

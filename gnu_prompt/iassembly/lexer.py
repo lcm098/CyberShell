@@ -140,6 +140,9 @@ PXS = "PXS"
 PZS = "PZS"
 RPTR = "RPTR"
 
+ELIF = "ELIF"
+ELSE = "ELSE"
+
 
 TOKEN_TYPES = [
     MOV, ADD, SUB, MUL, DIV, MOD, CMP, JMP,
@@ -154,7 +157,7 @@ TOKEN_TYPES = [
     EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT, EGX, EHX,
     EIX, EJX, EKX, ELX, EMX, ENX, EOX, EPX, EQX, ERX, ESX, ETX, EUX, EVX, EWX, EYX,
     RAS, RBS,  RCS, RDS, RES, RFS, RXS, RZS, PAS, PBS,  PCS, PDS, PES, PFS, PXS, PZS,
-    RPTR
+    RPTR, ELIF, ELSE
 ]
 
 keywords = {
@@ -220,6 +223,8 @@ keywords = {
     "popa" : POPA,
     "clsv" : CLSV,
     "dec" : DEC,
+    "elif" : ELIF,
+    "else" : ELSE,
     "get" : GET,
     "compute" : COMPUTE,
     "is" : IS,
@@ -580,6 +585,8 @@ class TokenType:
     CLSV = "CLSV" # clear variable
     LINK = "LINK"
     IS = "IS"
+    ELIF = "ELIF"
+    ELSE = "ELSE"
     ARRAY_GROUP_OPERATOR = "ARRAY_GROUP_OPERATOR"
     INVOKE =  "INVOKE"
     EOF = "EOF"  # Added missing EOF token type

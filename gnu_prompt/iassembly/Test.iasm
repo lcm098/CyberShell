@@ -34,28 +34,6 @@ section .text ||
 	call write, fptr
 	
 	
-
-	cmp cptr, [(exx[1] == "kutte") && (exx[6] == 47)]
-	[
-		mov eax, true
-		mov ebx, [eax]
-		link fptr, ebx
-		call write, fptr
-	]
-	elif cptr, [true==true]
-	[
-		mov eax, "partial"
-		mov ebx, [eax]
-		link fptr, ebx
-		call write, fptr
-	]
-	else cptr
-	[
-		mov eax, false
-		mov ebx, [eax]
-		link fptr, ebx
-		call write, fptr
-	]
 	"""
 	
 	"""
@@ -65,8 +43,8 @@ section .text ||
 	link ebx, vptr
 	compute vptr, [3*9]
 	link ecx, vptr
-    	compute vptr, [(False & True) == True] // which is False
-    	link efx, vptr
+    compute vptr, [(False & True) == True] // which is False
+    link efx, vptr
 	
 	mov edx, [eax, ebx, ecx, efx]
 	link fptr, edx
@@ -162,14 +140,17 @@ section .text ||
 
 
 	"""
+
 	mov eax, ["Hello", 12, 9.9, True, False]
 	mov ebx, [#eax[3], #eax[4]]
 
 	link fptr, ebx
 	call write, fptr
+
 	"""
 
 
+	"""
 	mov eax, [44, 66, 34, 85, 45]
 	compute vptr, [(#eax[1] <= #eax[0])]
 
@@ -178,5 +159,33 @@ section .text ||
 
 	link fptr, ecx
 	call write, fptr
+	"""
+
+
+	mov ecx, 6
+	mov edx, 5
+
+	cmp [ecx > edx] 
+	[
+		mov eax, [ecx, "is Greater Than", edx]
+		link fptr, eax
+		call write, fptr
+	] 
+	elif [ecx == edx]
+	[
+		mov eax, [ecx, "is equal to", edx]
+		link fptr, eax
+		call write, fptr
+	] 
+	else
+	[
+		mov eax, [ecx, "is not equal to", edx]
+		link fptr, eax
+		call write, fptr
+	]
+
+	// 'link' use to link value from eTypeRegister to (v, c, f, r)Register
+	// 'load' use to load value from (v, c, f, r)Register to eTypeRegister
+	// 'load' also load value from return by any function including (Stander, User defined)
 
 ||

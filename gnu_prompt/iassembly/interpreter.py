@@ -11,69 +11,8 @@ class ExprVisitor:
     Each visit method corresponds to a specific type of expression.
     """
 
-    def visit_number_expr(self, expr):
-        raise NotImplementedError("visit_number_expr must be implemented by a subclass.")
-    
-    def visit_bool_expr(self, expr):
-        raise NotImplementedError("visit_bool_expr must be implemented by a subclass.")
-    
-    def visit_nil_expr(self, expr):
-        raise NotImplementedError("visit_nil_expr must be implemented by a subclass.")
-    
-    def visit_char_expr(self, expr):
-        raise NotImplementedError("visit_char_expr must be implemented by a subclass.")
-    
-    def visit_binary_expr(self, expr):
-        raise NotImplementedError("visit_binary_expr must be implemented by a subclass.")
-
-    def visit_logical_expr(self, expr):
-        raise NotImplementedError("visit_logical_expr must be implemented by a subclass.")
-
-    def visit_unary_expr(self, expr):
-        raise NotImplementedError("visit_unary_expr must be implemented by a subclass.")
-
-    def visit_literal_expr(self, expr):
-        raise NotImplementedError("visit_literal_expr must be implemented by a subclass.")
-
-    def visit_grouping_expr(self, expr):
-        raise NotImplementedError("visit_grouping_expr must be implemented by a subclass.")
-
-    def visit_using_type_expr(self, expr):
-        raise NotImplementedError("visit_using_type_expr must be implemented by a subclass")
-
     def accept(self, visitor):
         raise NotImplementedError("Subclasses must implement accept method")
-
-    def visit_unknown_block(self, stmt):
-        raise NotImplementedError("visit_unknown_block must be implemented by a subclass")
-
-    def visit_float_expr(self, expr):
-        raise NotImplementedError("visit_float_expr must be implemented by a subclass")
-    
-    def visit_identifier(self, inst):
-        raise NotImplementedError("visit_identifier must be implemented by a subclass")
-        
-    def visit_Hidden_list_creation(self, inst):
-        raise NotImplementedError("visit_Hidden_list_creation must be implemented by a subclass")
-    
-    def visit_Load_instruction(self, inst):
-        raise NotImplementedError("visit_Load_instruction must be implemented by a subclass")
-    
-    def visit_mov_instruction(self, inst):
-        raise NotImplementedError("visit_mov_instruction must be implemented by a subclass")
-    
-    def accept(self, visitor):
-        raise NotImplementedError("Subclasses must implement accept method")
-
-    def visit_System_function_call(self, inst):
-        raise NotImplementedError("visit_System_function_call must implement as a method")
-
-    def visit_Compute_instruction_call(self, inst):
-        raise NotImplementedError("visit_Compute_instruction_call must be implemented by a subclass")
-
-    def visit_register(self, expr):
-        raise NotImplementedError("visit_register must be implemented by a subclass")
-
 
 class NotImplementedError(Exception):
     def __init__(self, message):
@@ -109,6 +48,7 @@ class Interpreter(ExprVisitor):
         self.Stander = StdVar.Stander()
         self.Normal = StdVar.Normal()
         
+        
     def visit_identifier(self, expr):
         return (expr.identifier.lexeme, "identifier", id(expr.identifier))
         
@@ -135,6 +75,26 @@ class Interpreter(ExprVisitor):
     def visit_rptr_pointer(self, expr):
         return (expr.pointer, "rptr", id(expr.pointer))
     
+    def visit_cmp_handler(self, inst):
+        cmp_condition = inst.cmp_condition
+        cmp_branches = inst.cmp_branches
+        elif_condition = inst.elif_condition
+        elif_branches = inst.elif_branches
+        else_block = inst.else_block
+        line1 = inst.line_1
+        line2 = inst.line_2
+        line3 = inst.line_3
+        
+        cmp_result = self.evaluate(cmp_condition)[0]
+        elif_result = self.evaluate(elif_condition)[0]
+        
+        if cmp_result is True:
+            self.execute_block(cmp_branches)
+        elif elif_result is True:
+            self.execute_block(elif_branches)
+        elif else_block is not None:
+            self.execute_block(else_block)
+    
     def visit_make_hidden_list(self, expr):
         elements = expr.elements
         line = expr.line
@@ -150,7 +110,7 @@ class Interpreter(ExprVisitor):
         line = expr.line
         
         if self.environment.is_defined(name):
-            y_value = self.environment.get(name)
+            y_value = self.is_opponent_y_regis(name, line)
             
             if isinstance(y_value, list):
                 
@@ -186,7 +146,7 @@ class Interpreter(ExprVisitor):
         
         if opponent_y[1] == self.Stander.fTypeRegister:
             while not isinstance(opponent_y, list):
-                opponent_y = self.environment.get(opponent_y)
+                opponent_y = self.is_opponent_y_regis(opponent_y, line)
             
             clean_list = []
             for item in opponent_y:
@@ -355,7 +315,7 @@ class Interpreter(ExprVisitor):
         identifier = inst.identifier.lexeme
         line = inst.line
         if self.environment.is_defined(identifier):
-            value = self.environment.get(identifier)
+            value = self.is_opponent_y_regis(identifier)
             return value
         else:
             raise InstructionError(f"identifier {identifier} is not defined, while using it. \t\tOn Line =[{line}]")
@@ -518,3 +478,4 @@ class Interpreter(ExprVisitor):
         if expr is None:
             return None
         return expr.accept(self)
+    

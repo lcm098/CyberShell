@@ -301,6 +301,26 @@ class Expr:
             return visitor.visit_list_element_access(self)
     
     
+    class HandleCmpInstructions:
+        def __init__(self, cmp_condition, cmp_branches, elif_condition, elif_branches, else_block, line_1, line_2, line_3):
+            self.cmp_condition = cmp_condition
+            self.cmp_branches = cmp_branches
+            self.elif_condition = elif_condition
+            self.elif_branches = elif_branches
+            self.else_block = else_block
+            self.line_1 = line_1
+            self.line_2 = line_2
+            self.line_3 =  line_3
+            
+        def __repr__(self):
+            return f"""HandleCmpInstructions=(line={self.line_1} cmp_condition={self.cmp_condition}
+                    cmp_branches={self.cmp_branches}, line={self.line_2} elif_condition={self.elif_condition})
+                    elif_branches={self.elif_branches}, line={self.line_3} else_block={self.else_block}"""
+        
+        def accept(self, visitor):
+            return visitor.visit_cmp_handler(self)
+    
+    
 class ParseError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -350,7 +370,60 @@ class Parser:
         elif self.match(TokenType.LINK):
             return self.handle_Link_instruction()
         
+        elif self.match(TokenType.CMP):
+            return self.handle_compare_statement()
+        
         return self.expression()
+
+
+    def handle_compare_statement(self):
+        
+        # Parse main condition (CMP)
+        line_1 = self.peek().line
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' before condition-statements enclosing, in cmp")
+        cmp_condition = self.expression()
+        self.consume(TokenType.RIGHT_BRACKET, "Expected ']' after condition-statements enclosing, in cmp")
+        cmp_block = self.consume_condition_block()
+        
+        # Initialize for elif/else branches
+        elif_branches = []
+        else_block = None
+        elif_condition = None
+        
+        # Handle ELIF branches (can be multiple)
+        line_2 = self.peek().line
+        while self.match(TokenType.ELIF):
+            self.consume(TokenType.LEFT_BRACKET, "Expected '[' before condition-statements enclosing, in elif")
+            elif_condition = self.expression()
+            self.consume(TokenType.RIGHT_BRACKET, "Expected ']' after condition-statements enclosing, in elif")
+            elif_block = self.consume_condition_block()
+            
+            # Store each elif branch with its condition
+            elif_branches.append(elif_block)
+        
+        # Handle ELSE branch (optional)
+        line_3 = self.peek().line
+        if self.match(TokenType.ELSE):
+            else_block = self.consume_condition_block()
+        
+        # Return the complete conditional structure
+        return Expr.HandleCmpInstructions(
+            cmp_condition,
+            cmp_block,
+            elif_condition,
+            elif_branches,
+            else_block,
+            line_1,
+            line_2,
+            line_3
+        )
+        
+    def consume_condition_block(self):
+        block = []
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' after before condition-code block enclosing")
+        while not self.match(TokenType.RIGHT_BRACKET):
+            block.append(self.declaration())
+        return block
 
     def handle_Link_instruction(self):
         line = self.peek().line

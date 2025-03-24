@@ -411,7 +411,7 @@ class Parser:
             cmp_condition,
             cmp_block,
             elif_condition,
-            elif_branches,
+            elif_branches[0],
             else_block,
             line_1,
             line_2,

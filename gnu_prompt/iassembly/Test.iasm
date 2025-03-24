@@ -162,7 +162,7 @@ section .text ||
 	"""
 
 
-	mov ecx, 6
+	mov ecx, 5
 	mov edx, 5
 
 	cmp [ecx > edx] 

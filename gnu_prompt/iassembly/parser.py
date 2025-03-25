@@ -472,10 +472,11 @@ class Parser:
         
         # Initialize for elif/else branches
         elif_branches = []
+        else_block = None
         
         # Handle ELIF branches (can be multiple)
+        line_2 = self.peek().line
         while self.match(TokenType.ELIF):
-            line_2 = self.peek().line
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' before condition-statements enclosing, in elif")
             elif_condition = self.expression()
             self.consume(TokenType.RIGHT_BRACKET, "Expected ']' after condition-statements enclosing, in elif")

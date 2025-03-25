@@ -302,10 +302,9 @@ class Expr:
     
     
     class HandleCmpInstructions:
-        def __init__(self, cmp_condition, cmp_branches, elif_condition, elif_branches, else_block, line_1, line_2, line_3):
+        def __init__(self, cmp_condition, cmp_branches, elif_branches, else_block, line_1, line_2, line_3):
             self.cmp_condition = cmp_condition
             self.cmp_branches = cmp_branches
-            self.elif_condition = elif_condition
             self.elif_branches = elif_branches
             self.else_block = else_block
             self.line_1 = line_1
@@ -314,7 +313,7 @@ class Expr:
             
         def __repr__(self):
             return f"""HandleCmpInstructions=(line={self.line_1} cmp_condition={self.cmp_condition}
-                    cmp_branches={self.cmp_branches}, line={self.line_2} elif_condition={self.elif_condition})
+                    cmp_branches={self.cmp_branches}, line={self.line_2})
                     elif_branches={self.elif_branches}, line={self.line_3} else_block={self.else_block}"""
         
         def accept(self, visitor):
@@ -473,19 +472,15 @@ class Parser:
         
         # Initialize for elif/else branches
         elif_branches = []
-        else_block = None
-        elif_condition = None
         
         # Handle ELIF branches (can be multiple)
-        line_2 = self.peek().line
         while self.match(TokenType.ELIF):
+            line_2 = self.peek().line
             self.consume(TokenType.LEFT_BRACKET, "Expected '[' before condition-statements enclosing, in elif")
             elif_condition = self.expression()
             self.consume(TokenType.RIGHT_BRACKET, "Expected ']' after condition-statements enclosing, in elif")
             elif_block = self.consume_condition_block()
-            
-            # Store each elif branch with its condition
-            elif_branches.append(elif_block)
+            elif_branches.append((elif_condition, elif_block))
         
         # Handle ELSE branch (optional)
         line_3 = self.peek().line
@@ -496,8 +491,7 @@ class Parser:
         return Expr.HandleCmpInstructions(
             cmp_condition,
             cmp_block,
-            elif_condition,
-            elif_branches[0],
+            elif_branches,
             else_block,
             line_1,
             line_2,

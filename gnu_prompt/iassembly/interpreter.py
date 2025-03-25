@@ -122,24 +122,27 @@ class Interpreter(ExprVisitor):
     
     
     def visit_cmp_handler(self, inst):
+        
         cmp_condition = inst.cmp_condition
         cmp_branches = inst.cmp_branches
-        elif_condition = inst.elif_condition
         elif_branches = inst.elif_branches
         else_block = inst.else_block
         line1 = inst.line_1
         line2 = inst.line_2
         line3 = inst.line_3
-        
-        cmp_result = self.evaluate(cmp_condition)[0]
-        elif_result = self.evaluate(elif_condition)[0]
-        
-        if cmp_result:
+
+        if self.evaluate(cmp_condition)[0]:
             self.execute_block(cmp_branches)
-        elif elif_result:
-            self.execute_block(elif_branches)
-        elif else_block:
+            return
+
+        for elif_condition, elif_block in elif_branches:
+            if self.evaluate(elif_condition)[0]:
+                self.execute_block(elif_block)
+                return
+
+        if else_block:
             self.execute_block(else_block)
+            
     
     def visit_make_hidden_list(self, expr):
         elements = expr.elements

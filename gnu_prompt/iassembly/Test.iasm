@@ -193,12 +193,50 @@ section .text ||
 	"""
 
 
+	"""
 	mov eax, 1
 	.loop [eax, eax <= 10000, ++eax]
 	[
 		mov ebx, [eax]
 		link fptr, ebx
 		call write, fptr
+	]
+	"""
+
+
+	mov eax, "Hello"
+	mov ebx, "hello"
+
+	cmp [eax == ebx]
+	[
+		mov ecx, ["Hello Boy"]
+		link fptr, ecx
+		call emit, fptr
+	]
+	elif [eax > ebx]
+	[
+		mov ecx, ["Hello suar"]
+		link fptr, ecx
+		call emit, fptr
+	]
+	elif [eax == 0]
+	[
+		mov ecx, ["Hello zero"]
+		link fptr, ecx
+		call emit, fptr
+	]
+
+	elif [eax < ebx]
+	[
+		mov ecx, ["Hello Boy is litte"]
+		link fptr, ecx
+		call emit, fptr
+	]
+	else
+	[
+		mov ecx, ["No Boy"]
+		link fptr, ecx
+		call emit, fptr
 	]
 
 

@@ -213,7 +213,31 @@ section .text ||
 		link fptr, ecx
 		call emit, fptr
 	]
-	
+	elif [eax > ebx]
+	[
+		mov ecx, ["Hello suar"]
+		link fptr, ecx
+		call emit, fptr
+	]
+	elif [eax == 0]
+	[
+		mov ecx, ["Hello zero"]
+		link fptr, ecx
+		call emit, fptr
+	]
+
+	elif [eax < ebx]
+	[
+		mov ecx, ["Hello Boy is litte"]
+		link fptr, ecx
+		call emit, fptr
+	]
+	else
+	[
+		mov ecx, ["No Boy"]
+		link fptr, ecx
+		call emit, fptr
+	]
 
 
 	// 'link' use to link value from eTypeRegister to (v, c, f, r)Register

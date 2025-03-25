@@ -372,6 +372,17 @@ class Lexer:
         
     def is_digit(self, c):
         return c.isdigit()
+    
+    def is_uppercase_identifier(self, text):
+        """
+        Check if the identifier is in uppercase 
+        and not already a predefined keyword/token type
+        """
+        return (
+            text.isupper() and 
+            text not in keywords and 
+            text not in TOKEN_TYPES
+        )
 
     def number(self):
         while self.is_digit(self.peek()):

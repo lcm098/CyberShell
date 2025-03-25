@@ -132,15 +132,18 @@ class Interpreter(ExprVisitor):
         line3 = inst.line_3
 
         if self.evaluate(cmp_condition)[0]:
+            self.push_in_environment(self.Stander.cTypeRegister, self.evaluate(cmp_condition))
             self.execute_block(cmp_branches)
             return
 
         for elif_condition, elif_block in elif_branches:
             if self.evaluate(elif_condition)[0]:
+                self.push_in_environment(self.Stander.cTypeRegister, self.evaluate(elif_condition))
                 self.execute_block(elif_block)
                 return
 
         if else_block:
+            self.push_in_environment(self.Stander.cTypeRegister, False)
             self.execute_block(else_block)
             
     
@@ -193,7 +196,8 @@ class Interpreter(ExprVisitor):
         opponent_x = self.evaluate(inst.opponent_x)
         opponent_y = self.evaluate(inst.opponent_y)
         
-        if opponent_y[1] == self.Stander.fTypeRegister:
+        # fTypeRegister for argument as single function call, and rTypeRegister for nested function call
+        if opponent_y[1] == self.Stander.fTypeRegister or opponent_y[1] == self.Stander.rTypeRegister:
             while not isinstance(opponent_y, list):
                 opponent_y = self.is_opponent_y_regis(opponent_y, line)
             
@@ -231,7 +235,7 @@ class Interpreter(ExprVisitor):
         opponent_y = self.evaluate(inst.opponent_y)
         
         if self.Stander.isStander(opponent_x[1]):
-            if opponent_y[1] in (self.Normal.eTypeRegister):
+            if self.Normal.isNormal(opponent_y[1]):
                 y_value = self.is_opponent_y_regis(opponent_y, line)
                 self.push_in_environment(opponent_x, y_value)
             else:

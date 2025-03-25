@@ -230,7 +230,8 @@ section .text ||
 	[
 		mov ecx, ["Hello Boy is litte"]
 		link fptr, ecx
-		call emit, fptr
+		call write, fptr // nested function call
+		call emit, rptr  // nested function call 
 	]
 	else
 	[
@@ -256,6 +257,7 @@ section .text ||
 	// pointers
 	// enum
 	// struct
+	// Function, pusha, popa
 	// File-io, dict-io, os-io functions
 	// string-operations, math-operations, networking lib functions 
 	// list, dict, operation functions

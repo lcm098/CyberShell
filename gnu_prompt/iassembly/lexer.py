@@ -147,6 +147,8 @@ JUMP = "JUMP"
 END = "END"
 START = "START"
 MOUNT = "MOUNT"
+FREE = "FREE"
+CLEAN = "CLEAN"
 
 
 TOKEN_TYPES = [
@@ -162,7 +164,7 @@ TOKEN_TYPES = [
     EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT, EGX, EHX,
     EIX, EJX, EKX, ELX, EMX, ENX, EOX, EPX, EQX, ERX, ESX, ETX, EUX, EVX, EWX, EYX,
     RAS, RBS,  RCS, RDS, RES, RFS, RXS, RZS, PAS, PBS,  PCS, PDS, PES, PFS, PXS, PZS,
-    RPTR, ELIF, ELSE, LABEL, JUMP, END, START, MOUNT
+    RPTR, ELIF, ELSE, LABEL, JUMP, END, START, MOUNT, FREE, CLEAN
 ]
 
 keywords = {
@@ -244,6 +246,8 @@ keywords = {
     "None" : NONE,
     "loop" : LOOP,
     "add" : ADD,
+    "free" : FREE, # Free The Register from memory
+    "clean" : CLEAN, # clean register value
     "sub" : SUB,
     "mul" : MUL,
     "div" : DIV,
@@ -518,6 +522,8 @@ class Lexer:
 
 class TokenType:
     # Define token types as constants
+    FREE = "FREE"
+    CLEAN = "CLEAN"
     MOV = "MOV"
     ADD = "ADD"
     SUB = "SUB"

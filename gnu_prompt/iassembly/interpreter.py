@@ -93,7 +93,6 @@ class Interpreter(ExprVisitor):
                 update_value = self.evaluate(updating)
                 self.push_in_environment(initialize, update_value)
                 
-            del self.environment.values[initialize]
         else:
             raise InstructionError(f"initializer or updating register is not eTypeRegister like (eax, ebx...) category")
         

@@ -206,4 +206,6 @@ section .text ||
 	// 'load' use to load value from (v, c, f, r)Register to eTypeRegister
 	// 'load' also load value from return by any function including (Stander, User defined)
 	// 'eax + 1' is like increment reat of all -, /, *, % are similar
+
+	// Tommorow, i have to implement --> free, clean, .data section( and link with 'mount' OpCOde)
 ||

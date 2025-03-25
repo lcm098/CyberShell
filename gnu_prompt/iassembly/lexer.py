@@ -460,11 +460,11 @@ class Lexer:
         elif c == ':':
             self.add_token(COLON)
         elif c == '+':
-            if self.match(TokenType.PLUS):
+            if self.match('+'):
                 self.add_token(INCREMENT)
             self.add_token(PLUS)
         elif c == '-':
-            if self.match(TokenType.MINUS):
+            if self.match('-'):
                 self.add_token(DECREMENT)
             self.add_token(MINUS)
         elif c == '*':

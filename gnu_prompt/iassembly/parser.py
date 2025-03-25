@@ -604,8 +604,12 @@ class Parser:
     def unary(self):
         if self.match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS, TokenType.INCREMENT, TokenType.DECREMENT):
             operator = self.previous()
-            right = self.unary()
-            return Expr.Unary(self.peek().line, operator, right)
+            if operator.type in [TokenType.INCREMENT, TokenType.DECREMENT]:
+                right = self.unary()  # Prefix increment/decrement (e.g., ++a, --a)
+                return Expr.Unary(self.peek().line, operator, right)
+            else:
+                right = self.primary()  # Unary operations like `!` or `-`, `+`
+                return Expr.Unary(self.peek().line, operator, right)
         return self.primary()
 
     def primary(self):

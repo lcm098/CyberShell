@@ -194,7 +194,7 @@ section .text ||
 
 
 	mov eax, 1
-	.loop [eax, eax <= 10, eax+1]
+	.loop [eax, eax <= 10000, ++eax]
 	[
 		mov ebx, [eax]
 		link fptr, ebx

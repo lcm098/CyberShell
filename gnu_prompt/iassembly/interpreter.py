@@ -76,6 +76,28 @@ class Interpreter(ExprVisitor):
         return (expr.pointer, "rptr", id(expr.pointer))
     
     
+    def visit_loop_instruction(self, inst):
+        line = inst.line
+        initialize = self.evaluate(inst.initialize)
+        condition = inst.condition
+        updating = inst.updating
+        loop_branch = inst.loop_branch
+        
+        if self.Normal.isNormal(initialize[1]):
+            while True:
+                condition_result = self.evaluate(condition)[0]
+                if not condition_result:
+                    break
+                
+                self.execute_block(loop_branch)
+                update_value = self.evaluate(updating)
+                self.push_in_environment(initialize, update_value)
+                
+            del self.environment.values[initialize]
+        else:
+            raise InstructionError(f"initializer or updating register is not eTypeRegister like (eax, ebx...) category")
+        
+    
     def visit_label_entry_frame(self, inst):
         label_name = self.evaluate(inst.label_name)[0]
         label_block = inst.label_block

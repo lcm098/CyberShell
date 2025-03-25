@@ -162,6 +162,7 @@ section .text ||
 	"""
 
 
+	"""
 	label start, from_here
 
 	mov ecx, 2
@@ -187,11 +188,22 @@ section .text ||
 	]
 
 	label end
-	
 	jump from_here
+
+	"""
+
+
+	mov eax, 1
+	.loop [eax, eax <= 10, eax+1]
+	[
+		mov ebx, [eax]
+		link fptr, ebx
+		call write, fptr
+	]
+
 
 	// 'link' use to link value from eTypeRegister to (v, c, f, r)Register
 	// 'load' use to load value from (v, c, f, r)Register to eTypeRegister
 	// 'load' also load value from return by any function including (Stander, User defined)
-
+	// 'eax + 1' is like increment reat of all -, /, *, % are similar
 ||

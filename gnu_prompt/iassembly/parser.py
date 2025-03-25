@@ -341,6 +341,20 @@ class Expr:
         
         def accept(self, visitor):
             return visitor.visit_jump_instruction(self)
+        
+    class Loop:
+        def __init__(self, line, initialize, condition, updating, loop_branch):
+            self.line = line
+            self.initialize = initialize
+            self.condition = condition
+            self.updating = updating
+            self.loop_branch = loop_branch
+            
+        def __repr__(self):
+            return f"LoopInstruction(line={self.line}, condition={self.condition}, updating={self.updating}, loop-branch={self.loop_branch})"
+        
+        def accept(self, visitor):
+            return visitor.visit_loop_instruction(self)
     
 class ParseError(Exception):
     def __init__(self, message):
@@ -400,8 +414,35 @@ class Parser:
         elif self.match(TokenType.JUMP):
             return self.handle_jump_instruction()
         
+        elif self.match(TokenType.DOT):
+            return self.handle_loop_instruction()
+        
         return self.expression()
 
+
+    def handle_loop_instruction(self):
+        line = self.peek().line
+        self.consume(TokenType.LOOP, "Expected 'loop' keyword after dot (.), while creating as a loop")
+        
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' before loop for loop-statements enclosing, after loop OpCOde")
+        initialize = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after loop-initializer example : .loop [eax, eax  <=  5, eax++] \n[....]")
+        condition = self.expression()
+        self.consume(TokenType.COMMA, "Expected ',' after loop-initializer example : .loop [eax, eax  <=  5, eax++] \n[....]")
+        updating = self.expression()        
+        self.consume(TokenType.RIGHT_BRACKET, "Expected ']' after loop for loop-statements enclosing, after loop OpCOde")
+        
+        self.consume(TokenType.LEFT_BRACKET, "Expected '[' after loop for loop-branches (statements-block) enclosing, after loop")
+        loop_branch = self.consume_loop_block()
+  
+        return Expr.Loop(line, initialize, condition, updating, loop_branch)
+
+    def consume_loop_block(self):
+        block = []
+        while not self.match(TokenType.RIGHT_BRACKET):
+            block.append(self.declaration())
+        return block
+    
 
     def handle_jump_instruction(self):
         label_name = self.expression()

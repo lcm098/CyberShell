@@ -146,6 +146,7 @@ LABEL = "LABEL"
 JUMP = "JUMP"
 END = "END"
 START = "START"
+MOUNT = "MOUNT"
 
 
 TOKEN_TYPES = [
@@ -161,7 +162,7 @@ TOKEN_TYPES = [
     EEX, EXX, EZX, FPTR, VPTR, CPTR, DD, DL, DR, INCREMENT, DECREMENT, EGX, EHX,
     EIX, EJX, EKX, ELX, EMX, ENX, EOX, EPX, EQX, ERX, ESX, ETX, EUX, EVX, EWX, EYX,
     RAS, RBS,  RCS, RDS, RES, RFS, RXS, RZS, PAS, PBS,  PCS, PDS, PES, PFS, PXS, PZS,
-    RPTR, ELIF, ELSE, LABEL, JUMP, END, START
+    RPTR, ELIF, ELSE, LABEL, JUMP, END, START, MOUNT
 ]
 
 keywords = {
@@ -230,6 +231,7 @@ keywords = {
     "elif" : ELIF,
     "else" : ELSE,
     "get" : GET,
+    "mount" : MOUNT,
     "compute" : COMPUTE,
     "is" : IS,
     "link" : LINK,
@@ -540,6 +542,7 @@ class TokenType:
     COLON = "COLON"
     COMMA = "COMMA"
     DOT = "DOT"
+    MOUNT = "MOUNT"
     LEFT_PAREN = "LEFT_PAREN"
     RIGHT_PAREN = "RIGHT_PAREN"
     LEFT_BRACE = "LEFT_BRACE"

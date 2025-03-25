@@ -208,4 +208,28 @@ section .text ||
 	// 'eax + 1' is like increment reat of all -, /, *, % are similar
 
 	// Tommorow, i have to implement --> free, clean, .data section( and link with 'mount' OpCOde)
+	// left nested function call,
+	// left user defined function
+	// error handling
+	// dict
+	// list
+	// variable
+	// include header
+	// pointers
+	// enum
+	// struct
+	// File-io, dict-io, os-io functions
+	// string-operations, math-operations, networking lib functions 
+	// list, dict, operation functions
+	// implement websocket framework by which user can use this language for web development
+	// threading functions
+	// process functions
+	// package-manager, iasm-package-manager
+	// type cast functions
+	// math functions
+	// date time functions
+	// JSON and Serialization Functions
+	// Networking and HTTP Functions
+	// Regex and Pattern Matching
+	// string Formation like '\n, \t, \a, \', \", \\\, {var1}, {varb}'
 ||

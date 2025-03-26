@@ -1,6 +1,7 @@
 import string
 import os
 import sys
+from iassembly.Error import LexerError
 
 # Define token types as constants
 MOV = "MOV"
@@ -288,13 +289,6 @@ class Token:
     def __repr__(self):
         return f"Token(type={self.type}, lexeme={self.lexeme}, literal={self.literal}, line={self.line})"
 
-class LexerError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-
-    def __repr__(self):
-        return self.message
 
 class Lexer:
     def __init__(self, code_content):

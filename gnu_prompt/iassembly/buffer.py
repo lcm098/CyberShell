@@ -1,11 +1,4 @@
-class Throw_Error(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-
-    def __repr__(self):
-        return self.message
-
+from iassembly.Error import Throw_Error
 
 class Environment:
     def __init__(self, enclosing=None):

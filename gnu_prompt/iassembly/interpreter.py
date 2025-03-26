@@ -3,6 +3,7 @@ from iassembly.buffer import *
 from iassembly.stdlib import *
 from iassembly.buffer import *
 from iassembly.stdvar import StdVar
+from iassembly.Error import NotImplementedError, ValueError, InstructionError
 
 class ExprVisitor:
         
@@ -14,29 +15,6 @@ class ExprVisitor:
     def accept(self, visitor):
         raise NotImplementedError("Subclasses must implement accept method")
 
-class NotImplementedError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-        
-    def __repr__(self):
-        return self.message
-
-class ValueError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-        
-    def __repr__(self):
-        return self.message
-    
-class InstructionError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-        
-    def __repr__(self):
-        return self.message
     
 class Interpreter(ExprVisitor):
     
@@ -75,6 +53,28 @@ class Interpreter(ExprVisitor):
     def visit_rptr_pointer(self, expr):
         return (expr.pointer, "rptr", id(expr.pointer))
     
+    
+    def visit_make_hidden_dict(self, expr):
+        _dict_ = expr._dict_
+        line = expr.line
+        clean_dict = {}
+        
+        def resolve_dict(_dict_):
+            for key, value in _dict_.items():
+                
+                beta_key = self.evaluate(key)
+                beta_value = self.evaluate(value)
+                
+                if isinstance(value, dict):
+                    resolve_dict(value)
+                elif isinstance(value, list):
+                    beta_value = self.is_opponent_y_regis(self.evaluate(value), line)
+                
+                clean_dict[beta_key] = beta_value
+                    
+            
+        resolve_dict(_dict_)
+        return clean_dict
     
     def visit_loop_instruction(self, inst):
         line = inst.line
@@ -158,22 +158,21 @@ class Interpreter(ExprVisitor):
     
     def visit_list_element_access(self, expr):
         name = self.evaluate(expr.name)
-        index = self.evaluate(expr.index)
+        indices = [self.evaluate(idx)[0] for idx in expr.indices]
         line = expr.line
         
         if self.environment.is_defined(name):
             y_value = self.is_opponent_y_regis(name, line)
             
             if isinstance(y_value, list):
-                
-                list_size = len(y_value)
-                if index[0] <= list_size:
-                    final_list_element = y_value[index[0]]
-                    return final_list_element
-                else:
-                    raise InstructionError(f"List Element Access : [access's size exceeded], size must be <= {list_size}, \n\tOn Line=[{line}]")
+                try:
+                    for idx in indices:
+                        y_value = y_value[idx]
+                    return y_value
+                except IndexError:
+                    raise InstructionError(f"List Element Access: [access's size exceeded], size must be <= {len(y_value)}, \n\tOn Line=[{line}]")
             else:
-                raise InstructionError(f"What The Fuck : [you are trying to access '{y_value}'s' element, which is not a list]")
+                raise InstructionError(f"What The Fuck: [you are trying to access '{y_value}'s element, which is not a list]")
         else:
             raise InstructionError(f"List {name} is not defined. \n\tOn Line=[{line}]")
     
@@ -198,7 +197,8 @@ class Interpreter(ExprVisitor):
         
         # fTypeRegister for argument as single function call, and rTypeRegister for nested function call
         if opponent_y[1] == self.Stander.fTypeRegister or opponent_y[1] == self.Stander.rTypeRegister:
-            while not isinstance(opponent_y, list):
+            
+            if not isinstance(opponent_y, list):
                 opponent_y = self.is_opponent_y_regis(opponent_y, line)
             
             clean_list = []
@@ -255,9 +255,12 @@ class Interpreter(ExprVisitor):
                     raise InstructionError(f"Cannot modify constant register {opponent_x[0]}. \n\tOn Line=[{line}]")
                 else:
                     # First initialization of a constant register
-                    if isinstance(opponent_y, list):
-                        clean_list = self.make_clean_list(opponent_y)
-                        self.push_in_environment(opponent_x, clean_list, is_const=True)
+                    if isinstance(opponent_y, (list, dict)):
+                        if isinstance(opponent_y, list):
+                            clean_value = self.make_clean_list(opponent_y)
+                        else:  # dict
+                            clean_value = self.make_clean_dict(opponent_y)
+                        self.push_in_environment(opponent_x, clean_value, is_const=True)
                     else:
                         self.push_in_environment(opponent_x, self.is_opponent_y_regis(opponent_y, line), is_const=True)
                     return
@@ -266,21 +269,27 @@ class Interpreter(ExprVisitor):
             if opponent_x[1] == self.Object.pType:
                 persistent_id = opponent_x[0]
                 
-                if isinstance(opponent_y, list):
-                    clean_list = self.make_clean_list(opponent_y)
+                if isinstance(opponent_y, (list, dict)):
+                    if isinstance(opponent_y, list):
+                        clean_value = self.make_clean_list(opponent_y)
+                    else:  # dict
+                        clean_value = self.make_clean_dict(opponent_y)
+                    
                     # Check if we should accumulate or replace
                     if self.environment.has_persistent(persistent_id):
                         old_value = self.environment.get_persistent(persistent_id)
-                        # Accumulate if numeric
-                        if isinstance(old_value, list) and len(old_value) > 0 and isinstance(old_value[0][0], (int, float)) and \
-                           isinstance(clean_list[0][0], (int, float)):
+                        # Accumulate if numeric (only for lists)
+                        if isinstance(old_value, list) and isinstance(clean_value, list) and \
+                        len(old_value) > 0 and len(clean_value) > 0 and \
+                        isinstance(old_value[0][0], (int, float)) and \
+                        isinstance(clean_value[0][0], (int, float)):
                             # Create proper value tuple preserving the format
-                            result_value = old_value[0][0] + clean_list[0][0]
+                            result_value = old_value[0][0] + clean_value[0][0]
                             result_type = "int" if isinstance(result_value, int) else "float"
-                            clean_list = [(result_value, result_type, id(result_value))]
+                            clean_value = [(result_value, result_type, id(result_value))]
                     
-                    self.environment.store_persistent(persistent_id, clean_list)
-                    self.push_in_environment(opponent_x, clean_list)
+                    self.environment.store_persistent(persistent_id, clean_value)
+                    self.push_in_environment(opponent_x, clean_value)
                 else:
                     value = self.is_opponent_y_regis(opponent_y, line)
                     # Check if we should accumulate or replace
@@ -298,13 +307,16 @@ class Interpreter(ExprVisitor):
             
             # Standard register handling
             if opponent_x[1] == self.Normal.eTypeRegister:
-                if isinstance(opponent_y, list):
-                    clean_list = self.make_clean_list(opponent_y)
-                    self.push_in_environment(opponent_x, clean_list)
+                if isinstance(opponent_y, (list, dict)):
+                    if isinstance(opponent_y, list):
+                        clean_value = self.make_clean_list(opponent_y)
+                    else:  # dict
+                        clean_value = self.make_clean_dict(opponent_y)
+                    self.push_in_environment(opponent_x, clean_value)
                 else:
                     value = self.is_opponent_y_regis(opponent_y, line)
-                    # If value is a list, handle it properly
-                    if isinstance(value, list):
+                    # If value is a list or dict, handle it properly
+                    if isinstance(value, (list, dict)):
                         self.push_in_environment(opponent_x, value)
                     else:
                         self.push_in_environment(opponent_x, value)
@@ -324,6 +336,36 @@ class Interpreter(ExprVisitor):
             else:
                 clean.append(item)
         return clean
+    
+    def make_clean_dict(self, _dict_):
+        clean_dict = {}
+
+        def nested_clean(value):
+            
+            if isinstance(value, list):
+                clean = []
+                for item in value:
+                    if isinstance(item, list):
+                        clean.append(nested_clean[item])
+                    clean.append(item[0])
+                return clean
+
+            if isinstance(value, dict):
+                clean = {}
+                for k, v in value.items():
+                    if isinstance(v, dict) or isinstance(v, list):
+                        clean[k[0] if isinstance(k, tuple) else k] = nested_clean(v)
+                    else:
+                        clean[k[0] if isinstance(k, tuple) else k] = v[0] if isinstance(v, tuple) else v
+                return clean
+            
+            return value[0] if isinstance(value, tuple) else value
+
+        for key, value in _dict_.items():
+            clean_dict[key[0] if isinstance(key, tuple) else key] = nested_clean(value)
+
+        return clean_dict
+        
         
     def is_opponent_y_regis(self, y, line):
         if (isinstance(y, list) or isinstance(y, tuple)) and self.Normal.isNormal(y[1]) or self.Stander.isStander(y[1]) or self.Object.isObject(y[1]):

@@ -203,7 +203,7 @@ section .text ||
 	]
 	"""
 
-
+	"""
 	mov eax, "Hello"
 	mov ebx, "hello"
 
@@ -239,20 +239,34 @@ section .text ||
 		link fptr, ecx
 		call emit, fptr
 	]
+	"""
+
+	"""
+	// nested hidden list
+	mov eax, [1, 2, ["Anoop", "sinha", ["where", [7, 8]]]]
+	mov ebx, #eax[2][2][1][1]
+	mov ecx, [ebx]
+	link fptr, ecx
+	call write, fptr
+	"""
 
 
+
+	mov eax, {"name": "anoop", "age": 20, "is_student": True, 3: 3, "employee": [1, 2, 3, 4], "hard_work": {"ram": ["Mohan"]}}
+	link fptr, [eax]
+	call write, fptr
+
+
+	"""
 	// 'link' use to link value from eTypeRegister to (v, c, f, r)Register
 	// 'load' use to load value from (v, c, f, r)Register to eTypeRegister
 	// 'load' also load value from return by any function including (Stander, User defined)
 	// 'eax + 1' is like increment reat of all -, /, *, % are similar
 
-	// Tommorow, i have to implement --> free, clean, .data section( and link with 'mount' OpCOde)
+	// Tommorow, i have to implement --> free, clean, hidden-dict, dict, list, var, .data section( and link with 'mount' OpCOde)
 	// left nested function call,
 	// left user defined function
 	// error handling
-	// dict
-	// list
-	// variable
 	// include header
 	// pointers
 	// enum
@@ -272,4 +286,5 @@ section .text ||
 	// Networking and HTTP Functions
 	// Regex and Pattern Matching
 	// string Formation like '\n, \t, \a, \', \", \\\, {var1}, {varb}'
+	"""
 ||
